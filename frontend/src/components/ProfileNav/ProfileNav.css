@@ -1,0 +1,79 @@
+.sidebar-container_profile{
+    color: #FFFFFF;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-logo{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bolder;
+    font-family: "Nunito";
+    cursor: pointer;
+    padding: 10px;
+}
+
+.sidebar-menu_profile{
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-img_profile {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.sidebar-img_profile img {
+    width: 100%;
+    object-fit: cover;
+}
+
+.sidebar-account_profile{
+    display: flex;
+    padding: 10px;
+    gap: 15px;
+    justify-content: center;
+    margin-top: auto;
+}
+
+.sidebar-details_profile {
+    display: flex;
+    flex-direction: column;
+    color: #FFFFFF;
+    margin: 0;
+}
+
+.sidebar-details_profile .sidebar-rol_profile {
+    font-size: 14px;
+    font-weight: 300;
+}
+
+.sidebar-details_profile .sidebar-username_profile {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.sidebar-logout-btn_profile{
+    padding: 20px;
+    border: 1px solid #FFFFFF;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    margin:auto;
+}
+
+.sidebar-logout-btn_profile:hover{
+    transition: all 0.2s;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.sidebar-logout-custom-icon_profile{
+    font-weight: 700;
+    margin-right: 5px;
+}

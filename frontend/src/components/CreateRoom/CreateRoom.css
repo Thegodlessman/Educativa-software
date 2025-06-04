@@ -1,0 +1,59 @@
+.header_create-class {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title_create-class {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.body_create-class {
+    padding: 20px;
+}
+
+.form_create-class {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.group_create-class {
+    display: flex;
+    flex-direction: column;
+}
+
+.label_create-class {
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.select_create-class,
+.input_create-class {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    height: 45px;
+}
+
+.select_create-class:focus,
+.input_create-class:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+}
+
+.button_create-class {
+    background-color: var(--primary-color);
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 10px;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+}
+
+.button_create-class:hover {
+    background-color: var(--secondary-color);
+}

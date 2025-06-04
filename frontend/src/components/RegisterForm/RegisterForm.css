@@ -1,0 +1,20 @@
+.name-lastname-container{
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}  
+
+.register-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px;
+
+    width: 100vw;
+    height: 95vh;
+}
+
+.margin-animacion_Register{
+    margin-top: 15px;
+}

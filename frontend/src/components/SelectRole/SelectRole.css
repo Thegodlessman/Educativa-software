@@ -1,0 +1,266 @@
+.modal-container_Role {
+    width: 500px;
+    height: 550px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 15px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    background-color: white;
+    position: relative;
+}
+
+.fixed-size-modal .modal-content {
+    width: 500px;
+    height: 550px;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.modal-body-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-custom-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-direction: column;
+}
+
+.close-button-x {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.8rem;
+    font-size: 24px;
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+}
+
+.role-selection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid white;
+    border-radius: 8px;
+}
+
+.role-selection:hover {
+    transform: scale(1.05);
+}
+
+.selected-role {
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+}
+
+.role-image {
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+.btn-next {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-next:disabled {
+    background-color: gray;
+    cursor: not-allowed;
+}
+
+.institution-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.institution-item {
+    padding: 10px 20px;
+    background-color: #f2f2f2;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+    font-weight: 500;
+    border: 2px solid transparent;
+    transition: 0.3s;
+}
+
+.institution-item:hover {
+    background-color: #e6e6e6;
+}
+
+.institution-item.selected {
+    border-color: var(--primary-color);
+    background-color: #f9f9f9;
+}
+
+.btn-back {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.image-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.upload-placeholder {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.preview-img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.user-summary-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid var(--secondary-color);
+    border-radius: 12px;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.summary-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--secondary-color);
+    margin-bottom: 10px;
+}
+
+.summary-info p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.btn-finish {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-finish:hover {
+    background-color: #115e3a;
+}
+
+.form-select {
+    background-color: #fff;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    color: var(--primary-color);
+    transition: border-color 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    outline: none;
+    cursor: pointer;
+}
+
+.form-select:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.form-select option {
+    background-color: #fff;
+    color: var(--primary-color);
+}
+
+.modal-body-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.progress-bar-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background-color: #eee;
+    border-radius: 0 0 20px 20px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease-in-out;
+}
+
+/* Nueva forma compacta de los selects */
+.form-group {
+    margin-bottom: 8px;
+}
+
+.form-select {
+    height: 36px;
+    font-size: 14px;
+    padding: 4px 8px;
+}
+
+/* Agrupar selects */
+.select-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.select-group .form-group {
+    flex: 1 1 48%;
+}

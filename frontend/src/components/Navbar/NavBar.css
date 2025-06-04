@@ -1,0 +1,51 @@
+.navbar-account_navbar {
+    cursor: pointer;
+}
+
+.navbar-img_navbar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.navbar-img_navbar img {
+    width: 100%;
+    object-fit: cover;
+}
+
+.navbar-account-rol_navbar {
+    font-size: 15px;
+    font-weight: 300;
+}
+
+.navbar-account-username_navbar {
+    font-weight: 500;
+}
+
+.container-navbar{
+    padding: 30px;
+    height: 60px;
+}
+
+.regis-btn_navbar{
+    text-decoration: none;
+    color: black;
+}
+
+.regis-btn_navbar:hover{
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+.navbar-dashboard{
+    position: fixed;
+    padding: 30px;
+    top: 0;
+    left: 250px;
+    right: 0;
+    height: 60px;
+    background-color: #fff;
+    z-index: 1--;
+    border-bottom: 1px solid #ddd;
+}

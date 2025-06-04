@@ -1,0 +1,55 @@
+.landing-container{
+    background-color: var(--primary-color);
+    padding: 20px 0 20px 0;
+    height: 100%;
+}
+
+.landing-container-welcome{
+    display: flex;
+    flex-direction: row;
+    background-color: white;
+}
+.landing-container-welcome-text{
+    display: flex;
+    flex-direction: column;
+    padding: 60px;
+}
+
+.select-rol_landing-page{
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.welcome-title{
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 45px;
+}
+
+.welcome-text{
+    font-weight: 700;
+    font-size: 45px;
+}
+
+.welcome-img{
+    height: 600px;
+    width: 600px;
+}
+
+.select-rol-text_landing-page{
+    color: #797979;
+    font-weight: 400;
+    font-size: 20px;
+}
+
+.select-rol-button_landing-page{
+    margin-top: 20px;
+    width: 43%;
+    height: 40px;
+    color: white;
+
+    border: none;
+    border-radius: 10px;
+    background-color: var(--secondary-color);
+}
