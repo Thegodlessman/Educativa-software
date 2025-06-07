@@ -14,13 +14,31 @@ const getMaterialIcon = (materialType) => {
     return <BsQuestionCircle size={20} className="me-2" />;
 };
 
+const renderAnswer = (answer) => {
+    if (!answer) return <span className="text-muted">N/A</span>;
+    const isYes = answer.toLowerCase() === 'sí';
+    const color = isYes ? 'text-success' : 'text-danger';
+    const icon = isYes ? <BsCheckCircle className="me-2" /> : <BsXCircle className="me-2" />;
+
+    return (
+        <span className={`fw-bold ${color}`}>
+            {icon}
+            {answer}
+        </span>
+    );
+};
+
+
 function StudentTestDetail({ studentData, onClose }) {
     const [testMetrics, setTestMetrics] = useState(null);
     const [supportMaterials, setSupportMaterials] = useState([]);
+    const [questionAnswers, setQuestionAnswers] = useState([]);
     const [loadingMetrics, setLoadingMetrics] = useState(false);
     const [loadingMaterials, setLoadingMaterials] = useState(false);
+    const [loadingAnswers, setLoadingAnswers] = useState(false);
     const [errorMetrics, setErrorMetrics] = useState('');
     const [errorMaterials, setErrorMaterials] = useState('');
+    const [errorAnswers, setErrorAnswers] = useState('');
 
     useEffect(() => {
         if (studentData && studentData.id_test) {
@@ -37,8 +55,24 @@ function StudentTestDetail({ studentData, onClose }) {
                 .finally(() => {
                     setLoadingMetrics(false);
                 });
+
+            setLoadingAnswers(true);
+            setErrorAnswers('');
+            axios.get(`${import.meta.env.VITE_BACKEND_URL}test/${studentData.id_test}/answers`)
+                .then(response => {
+                    setQuestionAnswers(response.data);
+                })
+                .catch(err => {
+                    console.error("Error fetching question answers:", err);
+                    setErrorAnswers("No se pudieron cargar las respuestas del cuestionario.");
+                })
+                .finally(() => {
+                    setLoadingAnswers(false);
+                });
+
         } else {
             setTestMetrics(null);
+            setQuestionAnswers([]);
         }
 
         if (studentData && studentData.id_risk_level) {
@@ -101,16 +135,37 @@ function StudentTestDetail({ studentData, onClose }) {
                                 <Table striped bordered hover responsive size="sm" className="metrics-table">
                                     <tbody>
                                         <tr><td><BsGraphUp className="me-2 text-info" />Tiempo Prom. Reacción (Aciertos):</td><td>{testMetrics.reaction_time_avg ? `${parseFloat(testMetrics.reaction_time_avg).toFixed(0)} ms` : 'N/A'}</td></tr>
-                                        <tr><td><BsCheckCircle className="text-success me-2" />Aciertos (Obst. Destruidos):</td><td>{testMetrics.correct_decisions ?? 'N/A'}</td></tr>
+                                        <tr><td><BsCheckCircle className="text-success me-2" />Aciertos (Obst. Destruidos):</td><td>{testMetrics.correct_decisions_count ?? 'N/A'}</td></tr>
                                         <tr><td><BsXCircle className="text-danger me-2" />Errores (Colisiones):</td><td>{testMetrics.error_count ?? 'N/A'}</td></tr>
                                         <tr><td><BsLightningCharge className="text-warning me-2" />Disparos Fallidos:</td><td>{testMetrics.missed_shots_count ?? 'N/A'}</td></tr>
                                         <tr><td><BsClockHistory className="me-2" />Duración Total del Juego:</td><td>{testMetrics.total_time ? `${parseFloat(testMetrics.total_time).toFixed(1)} seg` : 'N/A'}</td></tr>
-                                        {/* Se puede añadir más métricas aquí si las guardas */}
                                     </tbody>
                                 </Table>
                             )}
                             {(!testMetrics || Object.keys(testMetrics).length === 0) && !loadingMetrics && !errorMetrics && <p className="text-muted">No hay métricas detalladas disponibles para este test.</p>}
                         </Tab>
+
+                        <Tab eventKey="answers" title={<><BsQuestionCircle className="me-1" /> Cuestionario</>}>
+                            <div className="p-2">
+                                {loadingAnswers && <div className="text-center my-3"><Spinner animation="border" /> <p>Cargando respuestas...</p></div>}
+                                {errorAnswers && <Alert variant="danger">{errorAnswers}</Alert>}
+                                {!loadingAnswers && !errorAnswers && (
+                                    questionAnswers.length > 0 ? (
+                                        <ListGroup variant="flush">
+                                            {questionAnswers.map((qa) => (
+                                                <ListGroup.Item key={qa.id_answer} className="px-1">
+                                                    <p className="mb-1"><strong>Pregunta:</strong> {qa.question_text}</p>
+                                                    <p className="mb-0"><strong>Respuesta:</strong> {renderAnswer(qa.user_answer)}</p>
+                                                </ListGroup.Item>
+                                            ))}
+                                        </ListGroup>
+                                    ) : (
+                                        <Alert variant="info">No se encontraron respuestas del cuestionario para este test.</Alert>
+                                    )
+                                )}
+                            </div>
+                        </Tab>
+                        
                         <Tab eventKey="support" title={<><BsCollectionPlay className="me-1" /> Material de Apoyo</>}>
                             <Alert variant="warning" className="mt-3 mb-4 text-center disclaimer-alert">
                                 <BsExclamationTriangleFill size={24} className="me-2" />
@@ -121,7 +176,7 @@ function StudentTestDetail({ studentData, onClose }) {
                             {loadingMaterials && <div className="text-center my-3"><Spinner animation="border" /> <p>Cargando material...</p></div>}
                             {errorMaterials && <Alert variant="danger">{errorMaterials}</Alert>}
                             {!loadingMaterials && supportMaterials.length === 0 && !errorMaterials && (
-                                <Alert variant="info">No hay material de apoyo específico disponible para el nivel de riesgo: "{studentData.risk_level_name || 'No determinado'}".</Alert>
+                                <Alert variant="info">No hay material de apoyo específico disponible para el nivel de riesgo: "{studentData.risk_name || 'No determinado'}".</Alert>
                             )}
                             {supportMaterials.length > 0 && (
                                 <ListGroup variant="flush">

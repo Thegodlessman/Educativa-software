@@ -47,25 +47,25 @@ io.on('connection', (socket) => {
     socket.on('submitGameTestResults', async (receivedMetrics) => {
         console.log(`Métricas de juego recibidas del cliente ${socket.id}:`);
         // console.log(JSON.stringify(receivedMetrics, null, 2)); 
-    
+
         const {
-            id_test_para_actualizar, 
+            id_test_para_actualizar,
             userId,
-            id_room, 
-            totalGameDuration, 
+            id_room,
+            totalGameDuration,
             score,
             error_count,
             correct_decisions,
-            reactionTimes, 
+            reactionTimes,
             missedShots
         } = receivedMetrics;
-    
+
         if (!id_test_para_actualizar) {
             console.error("Error: No se recibió id_test_para_actualizar desde el frontend.");
             socket.emit('gameTestError', { message: "Error: Falta ID de la prueba para guardar resultados." });
             return;
         }
-    
+
         // --- 1. Procesar Tiempos de Reacción ---
         let sumReactionTimeDestroy = 0;
         let countReactionTimeDestroy = 0;
@@ -83,45 +83,45 @@ io.on('connection', (socket) => {
         let variabilityReactionTimeMs = null;
         if (countReactionTimeDestroy > 1) {
             const mean = averageReactionTimeMs;
-            const variance = validReactionTimesDestroy.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (countReactionTimeDestroy -1);
+            const variance = validReactionTimesDestroy.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (countReactionTimeDestroy - 1);
             variabilityReactionTimeMs = Math.sqrt(variance);
         }
-    
+
         // --- 2. Calcular otras métricas derivadas ---
         const totalInteractionsWithObstacles = correct_decisions + error_count;
         const accuracyPercentage = totalInteractionsWithObstacles > 0 ? (correct_decisions / totalInteractionsWithObstacles) * 100 : 0;
         const gameDurationSeconds = totalGameDuration > 0 ? (totalGameDuration / 1000) : 0;
         const missedShotsPerMinute = gameDurationSeconds > 0 && missedShots > 0 ? (missedShots / (gameDurationSeconds / 60)) : 0;
         const errorsPerMinute = gameDurationSeconds > 0 && error_count > 0 ? (error_count / (gameDurationSeconds / 60)) : 0;
-    
+
         // --- 3. Lógica de Puntuación de Riesgo ---
         let riskScore = 0;
         const riskFactors = [];
         if (error_count > 5) { riskScore += 2; riskFactors.push("Alto número de errores."); }
         if (averageReactionTimeMs && averageReactionTimeMs > 700) { riskScore += 2; riskFactors.push("Tiempo de reacción promedio elevado."); }
         if (variabilityReactionTimeMs && averageReactionTimeMs && (variabilityReactionTimeMs / averageReactionTimeMs) > 0.6) { riskScore += 3; riskFactors.push("Alta variabilidad en tiempos de reacción."); }
-        if (missedShotsPerMinute > 10) { riskScore += 2; riskFactors.push("Alto número de disparos fallidos por minuto.");}
-    
+        if (missedShotsPerMinute > 10) { riskScore += 2; riskFactors.push("Alto número de disparos fallidos por minuto."); }
+
         console.log("Factores de Riesgo Calculados:", riskFactors);
-    
+
         // --- 4. Determinar Nivel de Riesgo y Recomendación ---
-        let inferredRiskLevelName = "Nada probable"; 
+        let inferredRiskLevelName = "Nada probable";
         let recommendationText = "Rendimiento dentro de los parámetros esperados.";
-        if (riskScore >= 6) { 
+        if (riskScore >= 6) {
             inferredRiskLevelName = "Muy probable";
             recommendationText = "Se recomienda evaluación profesional detallada.";
         } else if (riskScore >= 3) {
             inferredRiskLevelName = "Poco probable";
             recommendationText = "Se sugiere observación y seguimiento del rendimiento atencional.";
         }
-        
+
         const client = await pool.connect();
         try {
             await client.query('BEGIN');
-    
+
             // a. Obtener id_risk_level
             const riskLevelQuery = await client.query(
-                'SELECT id_risk_level FROM risk_levels WHERE risk_name = $1', 
+                'SELECT id_risk_level FROM risk_levels WHERE risk_name = $1',
                 [inferredRiskLevelName]
             );
             let id_risk_level;
@@ -134,7 +134,7 @@ io.on('connection', (socket) => {
                 client.release();
                 return;
             }
-    
+
             // b. ACTUALIZAR el registro en la tabla 'tests'
             const testUpdateQuery = `
                 UPDATE tests
@@ -149,9 +149,9 @@ io.on('connection', (socket) => {
                 id_risk_level,
                 score,
                 recommendationText,
-                id_test_para_actualizar 
+                id_test_para_actualizar
             ]);
-    
+
             if (testUpdateResult.rowCount === 0) {
                 console.error(`No se encontró el test con ID: ${id_test_para_actualizar} para actualizar.`);
                 await client.query('ROLLBACK');
@@ -160,7 +160,7 @@ io.on('connection', (socket) => {
                 return;
             }
             console.log("Test actualizado con ID:", id_test_para_actualizar);
-    
+
             // c. Insertar en la tabla 'test_metrics'
             const metricsInsertQuery = `
                 INSERT INTO test_metrics (
@@ -173,23 +173,45 @@ io.on('connection', (socket) => {
                 id_test_para_actualizar,
                 averageReactionTimeMs ? parseFloat(averageReactionTimeMs.toFixed(2)) : null,
                 error_count,
-                correct_decisions, 
-                missedShots,     
-                0,               
-                gameDurationSeconds ? parseFloat(gameDurationSeconds.toFixed(2)) : null 
+                correct_decisions,
+                missedShots,
+                0,
+                gameDurationSeconds ? parseFloat(gameDurationSeconds.toFixed(2)) : null
             ]);
             console.log("Métricas del test guardadas para test ID:", id_test_para_actualizar);
-    
+
+            const { questionsAnswered } = receivedMetrics;
+
+            if (questionsAnswered && Array.isArray(questionsAnswered) && questionsAnswered.length > 0) {
+                console.log("Guardando respuestas de preguntas para el test ID:", id_test_para_actualizar);
+
+                const answerInsertQuery = `
+                INSERT INTO test_Youtubes (
+                    id_test, question_text, user_answer, answer_timestamp
+                ) VALUES ($1, $2, $3, TO_TIMESTAMP($4 / 1000.0));
+                ` ;
+                for (const ans of questionsAnswered) {
+                    await client.query(answerInsertQuery, [
+                        id_test_para_actualizar,
+                        ans.questionText,
+                        ans.answer,
+                        ans.timestamp
+                    ]);
+                }
+
+                console.log(`${questionsAnswered.length} respuestas de preguntas guardadas.`);
+            }
+
             await client.query('COMMIT');
-    
-            socket.emit('gameTestAnalysisResult', { 
-                userId, 
-                id_room, 
+
+            socket.emit('gameTestAnalysisResult', {
+                userId,
+                id_room,
                 id_test: id_test_para_actualizar,
                 inferredRiskLevel: inferredRiskLevelName,
                 recommendation: recommendationText
             });
-    
+
         } catch (error) {
             if (client) {
                 try { await client.query('ROLLBACK'); } catch (rbError) { console.error("Error durante el ROLLBACK:", rbError); }
@@ -198,7 +220,7 @@ io.on('connection', (socket) => {
             socket.emit('gameTestError', { message: "Error interno al procesar los resultados del juego." });
         } finally {
             if (client) {
-                client.release(); 
+                client.release();
             }
         }
     });

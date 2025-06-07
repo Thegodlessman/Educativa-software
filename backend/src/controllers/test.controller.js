@@ -203,3 +203,22 @@ export const getTestMetricsByTestId = async (req, res) => {
         res.status(500).json({ message: "Error interno al obtener las métricas del test." });
     }
 }
+
+export const getTestQuestionAnswers = async (req, res) => {
+    const { id_test } = req.params;
+
+    try {
+        const query = `
+            SELECT id_answer, question_text, user_answer, answer_timestamp
+            FROM test_Youtubes
+            WHERE id_test = $1
+            ORDER BY answer_timestamp ASC;
+        `;
+        const { rows } = await pool.query(query, [id_test]);
+
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error("Error al obtener las respuestas de las preguntas del test:", error);
+        res.status(500).json({ message: "Error interno al obtener las respuestas." });
+    }
+};
