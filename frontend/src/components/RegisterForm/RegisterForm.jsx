@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
+import { Form, Button, Alert, InputGroup, Row, Col } from "react-bootstrap";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { ping } from "ldrs";
-
-import "./RegisterForm.css";
 import { notifyError, notifySuccess } from "../../utils/notify";
+import logo from '../../../src/assets/logo.png';
+import './RegisterForm.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faIdCard, faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 
 ping.register();
 
 function RegisterForm() {
+    const navigate = useNavigate();
     const [user_name, setName] = useState("");
     const [user_lastname, setLastName] = useState("");
     const [user_ced, setCed_user] = useState("");
@@ -16,182 +20,112 @@ function RegisterForm() {
     const [user_password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [errors, setErrors] = useState({});
-    const [isRegistered, setIsRegistered] = useState(false);
+    const [pressButton, setPressButton] = useState(false);
 
     const validateForm = () => {
         const newErrors = {};
-
-        if (!user_email) newErrors.user_email = "Ingrese su correo, por favor";
-        else if (!/\S+@\S+\.\S+/.test(user_email)) newErrors.user_email = "El correo electrónico no es válido";
-
-        if (!user_password) newErrors.user_password = "Ingrese una contraseña, por favor";
-        else if (user_password.length < 6) newErrors.user_password = "La contraseña debe tener más de 6 caracteres";
-
-        if (!user_name) newErrors.user_name = "Ingrese un nombre, por favor";
-
-        if (!user_lastname) newErrors.user_lastname = "Ingrese un apellido, por favor";
-
-        if (!user_ced) newErrors.user_ced = "Ingrese una cédula, por favor";
-
-        if (confirmPassword !== user_password) newErrors.confirmPassword = "Las contraseñas deben coincidir";
-
+        if (!user_name) newErrors.user_name = "Ingrese su nombre, por favor.";
+        if (!user_lastname) newErrors.user_lastname = "Ingrese su apellido, por favor.";
+        if (!user_ced) newErrors.user_ced = "Ingrese su cédula, por favor.";
+        if (!user_email) newErrors.user_email = "Ingrese su correo, por favor.";
+        else if (!/\S+@\S+\.\S+/.test(user_email)) newErrors.user_email = "El formato del correo es inválido.";
+        if (!user_password) newErrors.user_password = "Ingrese una contraseña, por favor.";
+        else if (user_password.length < 6) newErrors.user_password = "La contraseña debe tener al menos 6 caracteres.";
+        if (confirmPassword !== user_password) newErrors.confirmPassword = "Las contraseñas no coinciden.";
         return newErrors;
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const userData = {
-            user_ced,
-            user_name,
-            user_lastname,
-            user_email,
-            user_password,
-        };
         const formErrors = validateForm();
         if (Object.keys(formErrors).length > 0) {
             setErrors(formErrors);
-            notifyError("Corrige todos los errores en el formulario para iniciar sesion")
+            notifyError("Por favor, corrige los errores del formulario.");
             return;
-        } else {
-            setErrors({});
-            setIsRegistered(true);
+        }
 
-            setTimeout(async () => {
-                try {
-                    const response = await axios.post("http://localhost:4555/users", userData);
-                    console.log(response.data);
+        setErrors({});
+        setPressButton(true);
 
-                    notifySuccess("Te has registrado exitosamente")
+        const userData = { user_ced, user_name, user_lastname, user_email, user_password };
 
-                    setTimeout(() => {
-                        redirectLogin();
-                    }, 1500);
-                } catch (error) {
-                    notifyError(error.response?.data?.message || "Error en el registro");
-                    setIsRegistered(false);
-                }
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}users`, userData);
+            console.log(response.data);
+            notifySuccess("¡Te has registrado exitosamente!");
+            setTimeout(() => {
+                navigate("/login");
             }, 1500);
+        } catch (error) {
+            notifyError(error.response?.data?.message || "Error en el registro.");
+            setPressButton(false);
         }
     };
 
-    const redirectLogin = () => {
-        window.location.href = "/login";
-    };
-
     const redirectHome = () => {
-        window.location.href = "/";
+        navigate("/");
     };
 
     return (
-        <>
-            <Container className="register-container">
-                <Row className="register-container mt-4">
-                    <Col xs={12} md={6}>
-                        <h1 className="mb-4 text-center logo-title fw-bolder" onClick={redirectHome}>
-                            <img className="me-1" src="../../../src/assets/logo.png" width="100" height="100" alt="logo" />
-                        </h1>
-                        <h2 className="mb-5 fw-bold text-center">Regístrate</h2>
+        <div className="register-form-container">
+            <div className="text-center mb-4" onClick={redirectHome} style={{ cursor: 'pointer' }}>
+                <img className="me-2" src={logo} width="60" height="60" alt="logo de educativa" />
+                <h1 className="logo-title fw-bolder d-inline-block align-middle">Educativa</h1>
+            </div>
 
-                        <Form className="form-container text-center" onSubmit={handleSubmit}>
-                            <div className="name-lastname-container">
-                                <Form.Group className="w-100 mb-3" controlId="formBasicName">
-                                    <Form.Control
-                                        className="border-secondary border-opacity-50 border-2 p-3 rounded-4 input-login"
-                                        type="name"
-                                        placeholder="Ingrese su nombre"
-                                        value={user_name}
-                                        name="user_name"
-                                        onChange={(e) => setName(e.target.value)}
-                                        isInvalid={!!errors.user_name}
-                                    />
-                                </Form.Group>
+            <h2 className="mb-4 fw-bold text-center">Crear una Cuenta</h2>
 
-                                <Form.Group className="w-100 mb-3" controlId="formBasicLastName">
-                                    <Form.Control
-                                        className="border-secondary border-opacity-50 border-2 p-3 rounded-4 input-login"
-                                        type="name"
-                                        placeholder="Ingrese su apellido"
-                                        value={user_lastname}
-                                        name="user_lastname"
-                                        onChange={(e) => setLastName(e.target.value)}
-                                        isInvalid={!!errors.user_lastname}
-                                    />
-                                </Form.Group>
-                            </div>
-
-                            <Form.Group className="mb-3" controlId="formBasicCed">
-                                <Form.Control
-                                    className="border-secondary border-opacity-50 border-2 p-3 rounded-4 input-login"
-                                    type="cedula"
-                                    placeholder="Ingrese su cédula"
-                                    value={user_ced}
-                                    name="user_ced"
-                                    onChange={(e) => setCed_user(e.target.value)}
-                                    isInvalid={!!errors.user_ced}
-                                />
-                            </Form.Group>
-
-                            <Form.Group className="mb-3" controlId="formBasicEmail">
-                                <Form.Control
-                                    className="border-secondary border-opacity-50 border-2 p-3 rounded-4 input-login"
-                                    type="email"
-                                    placeholder="Ingrese su correo"
-                                    value={user_email}
-                                    name="user_email"
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    isInvalid={!!errors.user_email}
-                                />
-                            </Form.Group>
-
-                            <Form.Group className="mb-3" controlId="formBasicPassword">
-                                <Form.Control
-                                    className="border-2 border-opacity-50 border-secondary p-3 rounded-4 input-login"
-                                    type="password"
-                                    placeholder="Ingrese su contraseña"
-                                    value={user_password}
-                                    name="user_password"
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    isInvalid={!!errors.user_password}
-                                />
-                            </Form.Group>
-
-                            <Form.Group className="mb-3" controlId="formBasicConfirmPassword">
-                                <Form.Control
-                                    className="border-2 border-opacity-50 border-secondary p-3 rounded-4 input-login"
-                                    type="password"
-                                    placeholder="Confirme su contraseña"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    isInvalid={confirmPassword !== user_password}
-                                />
-                            </Form.Group>
-
-                            {isRegistered ? (
-                                <div className="margin-animacion_Register">
-                                    <l-ping size="90" speed="3" color="#157347"></l-ping>
-                                </div>
-                            ) : (
-                                <Button
-                                    type="submit"
-                                    className="btn w-100 p-3 rounded-4 mt-4 mb-3 fw-bold login-btn btn-success"
-                                >
-                                    Crear Cuenta
-                                </Button>
-                            )}
-
-                            <div className="login-link-container">
-                                <span>
-                                    ¿Ya tienes una cuenta?{" "}
-                                    <a className="text-decoration-none forgotPass-link" href="/login">
-                                        Iniciar Sesión
-                                    </a>
-                                </span>
-                            </div>
-                        </Form>
+            <Form noValidate onSubmit={handleSubmit}>
+                <Row>
+                    <Col sm={6}>
+                        <InputGroup className="mb-3">
+                            <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faUser} /></InputGroup.Text>
+                            <Form.Control type="text" placeholder="Nombre" value={user_name} onChange={(e) => setName(e.target.value)} isInvalid={!!errors.user_name} />
+                        </InputGroup>
+                    </Col>
+                    <Col sm={6}>
+                        <InputGroup className="mb-3">
+                            <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faUser} /></InputGroup.Text>
+                            <Form.Control type="text" placeholder="Apellido" value={user_lastname} onChange={(e) => setLastName(e.target.value)} isInvalid={!!errors.user_lastname} />
+                        </InputGroup>
                     </Col>
                 </Row>
-            </Container>
-        </>
+                
+                <InputGroup className="mb-3">
+                    <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faIdCard} /></InputGroup.Text>
+                    <Form.Control type="text" placeholder="Cédula de Identidad" value={user_ced} onChange={(e) => setCed_user(e.target.value)} isInvalid={!!errors.user_ced} />
+                </InputGroup>
+
+                <InputGroup className="mb-3">
+                    <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faEnvelope} /></InputGroup.Text>
+                    <Form.Control type="email" placeholder="Correo Electrónico" value={user_email} onChange={(e) => setEmail(e.target.value)} isInvalid={!!errors.user_email} />
+                </InputGroup>
+
+                <InputGroup className="mb-3">
+                    <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faLock} /></InputGroup.Text>
+                    <Form.Control type="password" placeholder="Contraseña" value={user_password} onChange={(e) => setPassword(e.target.value)} isInvalid={!!errors.user_password} />
+                </InputGroup>
+
+                <InputGroup className="mb-3">
+                    <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faLock} /></InputGroup.Text>
+                    <Form.Control type="password" placeholder="Confirmar Contraseña" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} isInvalid={!!errors.confirmPassword} />
+                </InputGroup>
+
+                {pressButton ? (
+                    <div className='text-center py-2'>
+                        <l-ping size="45" speed="2" color="#4f46e5"></l-ping>
+                    </div>
+                ) : (
+                    <Button type="submit" className="btn-register w-100 fw-bold" size="lg">
+                        Crear Cuenta
+                    </Button>
+                )}
+
+                <div className="text-center mt-4 small">
+                    ¿Ya tienes una cuenta? <a className="fw-bold" href="/login">Inicia Sesión</a>
+                </div>
+            </Form>
+        </div>
     );
 }
 
