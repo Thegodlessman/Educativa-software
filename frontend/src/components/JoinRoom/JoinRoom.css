@@ -1,28 +1,69 @@
 .join-room-modal .modal-content {
-    border-radius: 12px;
-    border: 1px solid var(--primary-colormary);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-  
-  .join-room-header {
-    background-color: var(--primary-color);
-    color: #fff;
-    border-bottom: none;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-  }
-  
-  .input-code {
-    padding: 12px;
-    font-size: 1rem;
-    border: 1px solid var(--primary-color);
-    border-radius: 6px;
-    transition: border-color 0.3s;
-  }
-  
-  .input-code:focus {
-    border-color: var(--secondary-color);
-    box-shadow: 0 0 0 0.2rem rgba(100, 100, 255, 0.25);
-    outline: none;
-  }
-  
+  border-radius: 1rem;
+  border: none;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden; 
+}
+
+.modal-header-custom {
+  background: var(--primary-color);
+  border-bottom: none;
+}
+
+.modal-header-custom .modal-title {
+  font-weight: 600;
+}
+
+.modal-header-custom .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.join-room-modal .modal-body {
+  padding: 2rem;
+}
+
+.join-room-modal .icon-prefix {
+  background-color: #F9FAFB;
+  border-right: none !important;
+  color: #6B7280;
+  font-size: 1.2rem;
+  padding: 0 1rem;
+}
+
+.join-room-modal .input-code {
+  border-left: none !important;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.2rem;
+  padding: 0.75rem;
+  height: auto;
+}
+
+.join-room-modal .input-code::placeholder {
+  font-weight: 500;
+  font-size: 1rem;
+  letter-spacing: normal;
+}
+
+.join-room-modal .input-code:focus {
+  box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+  border-color: #ced4da !important;
+}
+
+.join-room-modal .modal-footer {
+  border-top: none;
+  padding: 0 1.5rem 1.5rem; 
+}
+
+.btn-join-room {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  padding: 0.75rem 1rem;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.btn-join-room:hover {
+  background-color: var(--secondary-color_gradient);
+  border-color: var(--secondary-color_gradient);
+}

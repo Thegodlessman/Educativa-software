@@ -1,20 +1,46 @@
-.name-lastname-container{
-    display: flex;
-    gap: 10px;
-    justify-content: space-between;
-}  
-
-.register-container{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 30px;
-
-    width: 100vw;
-    height: 95vh;
+.register-form-container {
+    width: 100%;
+    max-width: 450px; 
 }
 
-.margin-animacion_Register{
-    margin-top: 15px;
+.register-title {
+    font-size: 2.25rem;
+    color: #374151;
+}
+
+.icon-prefix {
+    background-color: #F9FAFB;
+    border-right: none !important;
+    color: #6B7280;
+}
+
+.form-control {
+    border-left: none !important;
+}
+
+.form-control:focus,
+.form-control.is-invalid:focus {
+    box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+    border-color: #ced4da !important;
+}
+
+.btn-register {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    padding: 0.75rem 1rem;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.btn-register:hover {
+    background-color: var(--primary-color_gradient);
+    border-color: var(--primary-color_gradient);
+}
+
+a {
+    color: var(--secondary-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }

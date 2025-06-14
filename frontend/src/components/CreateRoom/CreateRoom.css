@@ -1,59 +1,57 @@
-.header_create-class {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.create-room-modal .modal-content {
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
-.title_create-class {
-    font-size: 1.8rem;
-    font-weight: bold;
+.modal-header-custom {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    border-bottom: none;
 }
 
-.body_create-class {
-    padding: 20px;
-}
-
-.form_create-class {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.group_create-class {
-    display: flex;
-    flex-direction: column;
-}
-
-.label_create-class {
-    margin-bottom: 5px;
+.modal-header-custom .modal-title {
     font-weight: 600;
 }
 
-.select_create-class,
-.input_create-class {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
-    height: 45px;
+.modal-header-custom .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
 }
 
-.select_create-class:focus,
-.input_create-class:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+.create-room-modal .modal-body {
+    padding: 1.5rem 2rem 2rem;
 }
 
-.button_create-class {
-    background-color: var(--primary-color);
-    border: none;
-    padding: 10px 20px;
-    font-size: 1rem;
-    border-radius: 10px;
-    margin-top: 15px;
-    transition: background-color 0.3s ease;
+.create-room-modal .icon-prefix {
+    background-color: #F9FAFB;
+    border-right: none !important;
+    color: #6B7280;
+    width: 50px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.button_create-class:hover {
+.create-room-modal .form-control,
+.create-room-modal .form-select {
+    border-left: none !important;
+    height: 48px; 
+}
+
+.create-room-modal .form-control:focus,
+.create-room-modal .form-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+    border-color: #ced4da !important;
+}
+
+.btn-create-room {
     background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    padding: 0.75rem 1rem;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.btn-create-room:hover {
+    background-color: var(--secondary-color_gradient);
+    border-color: var(--secondary-color_gradient);
 }

@@ -1,75 +1,87 @@
 import React, { useContext, useState } from 'react';
-import { Modal, Button, Form } from 'react-bootstrap';
+import { Modal, Button, Form, InputGroup } from 'react-bootstrap';
 import jwtDecode from 'jwt-decode';
-import axios from 'axios'
+import axios from 'axios';
 import { ClassContext } from '../../context/ClassContext';
-
-import './JoinRoom.css'
 import { notifyError, notifySuccess } from '../../utils/notify';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHashtag } from '@fortawesome/free-solid-svg-icons';
+
+import './JoinRoom.css';
 
 function JoinRoom({ show, handleClose }) {
     const [roomCode, setRoomCode] = useState('');
-    const token = localStorage.getItem('token')
-    const decodedToken = jwtDecode(token)
-
-    const { addClass } = useContext(ClassContext)
+    const { fetchClasses } = useContext(ClassContext);
 
     const handleJoin = async () => {
         try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                notifyError('No se encontró la sesión. Por favor, inicie sesión de nuevo.');
+                return;
+            }
+            const decodedToken = jwtDecode(token);
+
             if (!roomCode.trim()) {
-                notifyError('Por favor, ingresa un código válido');
+                notifyError('Por favor, ingresa un código de clase.');
                 return;
             }
 
-            const response = await axios.post(
+            await axios.post(
                 `${import.meta.env.VITE_BACKEND_URL}room/join`,
                 {
                     code_room: roomCode,
                     id_user: decodedToken.id_user
-                }
-                , { headers: { Authorization: `Bearer ${token}` } }
-            )
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
 
-            if(response.data.classes){
-                const nuevaClase = response.data.classes
+            notifySuccess("Te has unido a la clase exitosamente.");
+            await fetchClasses();
+            setRoomCode("");
+            handleClose();
 
-                notifySuccess("Te has unido a la clase")
-                addClass(nuevaClase)
-                setRoomCode("")
-                handleClose();
-            }
         } catch (error) {
-            if (error.response && error.response.data && error.response.data.message) {
-                notifyError(error.response.data.message);
-            } else {
-                notifyError("Ocurrió un error al unirse a la clase");
-            }
-            notifyError("Error al unirse a la clase:", error);
+            const errorMessage = error.response?.data?.message || "Ocurrió un error al unirse a la clase.";
+            notifyError(errorMessage);
+            console.error("Error al unirse a la clase:", error);
         }
+    };
 
+    const handleEnterKey = (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            handleJoin();
+        }
     };
 
     return (
-        <Modal show={show} onHide={handleClose} centered>
-            <Modal.Header closeButton className="header_create-class">
-                <Modal.Title className='title_create-class'>Ingrese el código de la clase</Modal.Title>
+        <Modal show={show} onHide={handleClose} centered dialogClassName="join-room-modal">
+            <Modal.Header closeButton className="modal-header-custom text-white">
+                <Modal.Title>Unirse a una Clase</Modal.Title>
             </Modal.Header>
-            <Modal.Body>
+            <Modal.Body className="text-center">
+                <p className="text-muted mb-4">Ingresa el código que te proporcionó tu profesor para acceder a la clase.</p>
                 <Form>
-                    <Form.Group controlId="formRoomCode">
+                    <InputGroup className="mb-3">
+                        <InputGroup.Text className="icon-prefix">
+                            <FontAwesomeIcon icon={faHashtag} />
+                        </InputGroup.Text>
                         <Form.Control
                             type="text"
                             className="input-code"
-                            placeholder=""
+                            placeholder="CÓDIGO DE LA CLASE"
                             value={roomCode}
                             onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                            onKeyDown={handleEnterKey}
+                            autoFocus
                         />
-                    </Form.Group>
+                    </InputGroup>
                 </Form>
             </Modal.Body>
-            <Modal.Footer className="d-flex justify-content-between">
-                <Button variant='success' className='button_create-class' onClick={handleJoin}>
-                    Unirse
+            <Modal.Footer>
+                <Button className="btn-join-room w-100 fw-bold" onClick={handleJoin}>
+                    Unirse a la Clase
                 </Button>
             </Modal.Footer>
         </Modal>
