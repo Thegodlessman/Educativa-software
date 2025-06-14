@@ -11,7 +11,7 @@ import './JoinRoom.css';
 
 function JoinRoom({ show, handleClose }) {
     const [roomCode, setRoomCode] = useState('');
-    const { addClass } = useContext(ClassContext);
+    const { fetchClasses } = useContext(ClassContext);
 
     const handleJoin = async () => {
         try {
@@ -27,7 +27,7 @@ function JoinRoom({ show, handleClose }) {
                 return;
             }
 
-            const response = await axios.post(
+            await axios.post(
                 `${import.meta.env.VITE_BACKEND_URL}room/join`,
                 {
                     code_room: roomCode,
@@ -36,15 +36,11 @@ function JoinRoom({ show, handleClose }) {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            console.log(response.data)
-            if (response.data.classes) {
-                const nuevaClase = response.data.classes;
-                notifySuccess("Te has unido a la clase exitosamente.");
-                
-                addClass(nuevaClase);
-                setRoomCode("");
-                handleClose();
-            }
+            notifySuccess("Te has unido a la clase exitosamente.");
+            await fetchClasses();
+            setRoomCode("");
+            handleClose();
+
         } catch (error) {
             const errorMessage = error.response?.data?.message || "Ocurrió un error al unirse a la clase.";
             notifyError(errorMessage);

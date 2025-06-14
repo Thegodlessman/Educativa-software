@@ -7,98 +7,96 @@ import { notifyError, notifySuccess } from "../../utils/notify";
 import "./CreateRoom.css";
 
 function CreateRoom({ show, handleClose }) {
-  const [institutions, setInstitutions] = useState([]);
-  const [selectedInstitution, setSelectedInstitution] = useState("");
-  const [section, setSection] = useState("");
-  const [maxCapacity, setMaxCapacity] = useState("");
-  const [grate, setGrate] = useState("");
+    const [institutions, setInstitutions] = useState([]);
+    const [selectedInstitution, setSelectedInstitution] = useState("");
+    const [section, setSection] = useState("");
+    const [maxCapacity, setMaxCapacity] = useState("");
+    const [grate, setGrate] = useState("");
 
-  const { addClass } = useContext(ClassContext);
+    const { fetchClasses } = useContext(ClassContext);
 
-  useEffect(() => {
-    const fetchInstitutions = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("Token no encontrado");
+    useEffect(() => {
+        const fetchInstitutions = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) throw new Error("Token no encontrado");
 
-        const decodedToken = jwt_decode(token);
-        const response = await axios.post(
-          "http://localhost:4555/room/insti",
-          { id_user: decodedToken.id_user },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+                const decodedToken = jwt_decode(token);
+                const response = await axios.post(
+                    "http://localhost:4555/room/insti",
+                    { id_user: decodedToken.id_user },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
 
-        if (response.data.success) {
-          setInstitutions(response.data.insti);
-        } else {
-          console.error("Error al obtener instituciones", response.data);
+                if (response.data.success) {
+                    setInstitutions(response.data.insti);
+                } else {
+                    console.error("Error al obtener instituciones", response.data);
+                }
+            } catch (error) {
+                console.error("Error fetching institutions:", error);
+            }
+        };
+
+        if (show) fetchInstitutions();
+    }, [show]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const capacity = parseInt(maxCapacity, 10);
+        const trimmedSection = section.trim();
+        const seccRegex = /^[A-Za-z]+$/;
+
+        if (!selectedInstitution || !trimmedSection || !maxCapacity || !grate) {
+            notifyError("Por favor, completa todos los campos antes de continuar.");
+            return;
         }
-      } catch (error) {
-        console.error("Error fetching institutions:", error);
-      }
+
+        if (!seccRegex.test(trimmedSection)) {
+            notifyError("La sección solo debe contener letras del abecedario.");
+            return;
+        }
+
+        if (capacity > 50) {
+            notifyError("La capacidad máxima permitida por clase es de 50 estudiantes.");
+            return;
+        }
+
+        const token = localStorage.getItem("token");
+        if (!token) return console.error("Token no encontrado");
+
+        try {
+            const decodedToken = jwt_decode(token);
+            const adminId = decodedToken.id_user;
+
+            await axios.post(
+                "http://localhost:4555/room/create",
+                {
+                    admin_room: adminId,
+                    secc_room: trimmedSection,
+                    id_institution: selectedInstitution,
+                    max_room: capacity,
+                    room_grate: grate
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            notifySuccess("Se ha creado la clase correctamente");
+            await fetchClasses();
+
+            setSection("");
+            setMaxCapacity("");
+            setSelectedInstitution("");
+            setGrate("");
+
+            handleClose();
+
+        } catch (error) {
+            notifyError("Ocurrió un error al crear la clase");
+            console.error("Error al crear clase:", error);
+        }
     };
-
-    if (show) fetchInstitutions();
-  }, [show]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const capacity = parseInt(maxCapacity, 10);
-    const trimmedSection = section.trim();
-    const seccRegex = /^[A-Za-z]+$/;
-
-    if (!selectedInstitution || !trimmedSection || !maxCapacity || !grate) {
-      notifyError("Por favor, completa todos los campos antes de continuar.");
-      return;
-    }
-
-    if (!seccRegex.test(trimmedSection)) {
-      notifyError("La sección solo debe contener letras del abecedario.");
-      return;
-    }
-
-    if (capacity > 50) {
-      notifyError("La capacidad máxima permitida por clase es de 50 estudiantes.");
-      return;
-    }
-
-    const token = localStorage.getItem("token");
-    if (!token) return console.error("Token no encontrado");
-
-    try {
-      const decodedToken = jwt_decode(token);
-      const adminId = decodedToken.id_user;
-
-      const response = await axios.post(
-        "http://localhost:4555/room/create",
-        {
-          admin_room: adminId,
-          secc_room: trimmedSection,
-          id_institution: selectedInstitution,
-          max_room: capacity,
-          room_grate: grate
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (response.data.success) {
-        const nuevaClase = response.data.room;
-        notifySuccess("Se ha creado la clase correctamente");
-        addClass(nuevaClase);
-
-        setSection("");
-        setMaxCapacity("");
-        setSelectedInstitution("");
-        setGrate("");
-
-        handleClose();
-      }
-    } catch (error) {
-      notifyError("Ocurrió un error al crear la clase");
-      console.error("Error al crear clase:", error);
-    }
-  };
 
   return (
     <Modal show={show} onHide={handleClose} centered backdrop="static">
