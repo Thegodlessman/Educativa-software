@@ -1,40 +1,50 @@
-.forgotPass-link{
-    font-size: 15px;
-    cursor: pointer;
+.login-form-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.logo-title {
+    font-size: 2.25rem;
+    color: #374151; 
+}
+
+.icon-prefix {
+    background-color: #F9FAFB;
+    border-right: none !important;
+    color: #6B7280;
+}
+
+.input-login {
+    border-left: none !important;
+}
+
+.input-login:focus,
+.input-login.is-invalid:focus {
+    box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+    border-color: #ced4da !important; 
+}
+
+#rememberMeCheckbox label {
+    font-size: 0.9rem;
+}
+
+.btn-login {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    padding: 0.75rem 1rem;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.btn-login:hover {
+    background-color: var(--primary-color_gradient);
+    border-color: var(--primary-color_gradient);
+}
+
+a {
     color: var(--primary-color);
-    font-weight: 500;
+    text-decoration: none;
 }
 
-.forgotPass-link:hover{
-    color: var(--primary-color);
-}
-
-.input-login:focus{
-    box-shadow: 0px 0px 5px 2px rgba(133,82,170,0.75);
-    -webkit-box-shadow: 0px 0px 5px 2px rgba(133,82,170,0.75);
-    -moz-box-shadow: 0px 0px 5px 2px rgba(133,82,170,0.75);
-}
-
-.login-btn{
-    background-color: var(--secondary-color);
-    border: none;
-}
-
-.login-btn:hover{
-    background-color: rgba(21,	115, 71, 0.75);
-    color: white;
-}
-
-.login-container{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 100vw;
-    height: 75vh;
-}
-
-.login-link-container{
-    margin-bottom: 15px;
-    display: grid;
-}
+a:hover {
+    text-decoration: underline;
+}   

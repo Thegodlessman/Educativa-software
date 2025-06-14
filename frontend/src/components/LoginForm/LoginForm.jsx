@@ -1,137 +1,144 @@
-import React, { useState, useContext} from "react";
-import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
+import React, { useState, useContext } from "react";
+import { Form, Button, Alert, InputGroup } from 'react-bootstrap';
 import axios from "axios";
-
-import { notifyError, notifySuccess } from '../../utils/notify';
 import { useNavigate } from "react-router-dom";
 import { ClassContext } from "../../context/ClassContext";
-
+import { notifyError, notifySuccess } from '../../utils/notify';
+import logo from '../../../src/assets/logo.png';
 import './LoginForm.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 
 function LoginForm() {
     const navigate = useNavigate();
     const [user_email, setEmail] = useState('');
     const [user_password, setPassword] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
     const [errors, setErrors] = useState({});
     const [pressButton, setPressButton] = useState(false);
-    const { setToken } = useContext(ClassContext)
+    const { setToken } = useContext(ClassContext);
 
     const validateForm = () => {
         const newErrors = {};
-        if (!user_email) newErrors.user_email = 'Ingrese su correo, por favor';
-        else if (!/\S+@\S+\.\S+/.test(user_email)) newErrors.user_email = 'El correo electronico no es valido';
-        if (!user_password) newErrors.user_password = 'Ingrese su contraseña, por favor';
-        else if (user_password.length < 6) newErrors.user_password = 'La contraseña debe tener más de 6 caracteres';
+        if (!user_email) newErrors.user_email = 'Ingrese su correo, por favor.';
+        else if (!/\S+@\S+\.\S+/.test(user_email)) newErrors.user_email = 'El formato del correo electrónico no es válido.';
+        if (!user_password) newErrors.user_password = 'Ingrese su contraseña, por favor.';
+        else if (user_password.length < 6) newErrors.user_password = 'La contraseña debe tener al menos 6 caracteres.';
         return newErrors;
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         const formErrors = validateForm();
-
         if (Object.keys(formErrors).length > 0) {
             setErrors(formErrors);
-            setPressButton(false); 
-        } else {
-            setErrors({});
-            setPressButton(true);
+            return;
+        }
 
-            setTimeout(async () => {
-                try {
-                    const response = await axios.post('http://localhost:4555/login', { user_email, user_password });
+        setErrors({});
+        setPressButton(true);
 
-                    // Verifica si la respuesta y la propiedad token existen
-                    if (response.data && response.data.tokenSession) {
-                        const { tokenSession } = response.data;
-
-                        localStorage.setItem('token', tokenSession);
-                        setToken(tokenSession); // <--- Actualizar el token en el contexto
-
-                        notifySuccess("Se ha iniciado sesion correctamente");
-                        navigate("/profile");
-
-                    } else {
-                        // Manejar caso donde la respuesta es exitosa (2xx) pero no viene el token esperado
-                        notifyError("Respuesta inesperada del servidor al iniciar sesión.");
-                        setPressButton(false); 
-                    }
-
-                } catch (error) {
-                    setPressButton(false); 
-                    const errorMessage = error.response?.data?.message || "Error al conectar con el servidor.";
-                    notifyError(errorMessage);
-                    
-                    console.error("Error en login:", error.response || error);
-                }
-            }, 1500); 
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}login`, { user_email, user_password });
+            if (response.data && response.data.tokenSession) {
+                const { tokenSession } = response.data;
+                localStorage.setItem('token', tokenSession);
+                setToken(tokenSession);
+                notifySuccess("Se ha iniciado sesión correctamente.");
+                navigate("/profile");
+            } else {
+                notifyError("Respuesta inesperada del servidor al iniciar sesión.");
+            }
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || "Error al conectar con el servidor.";
+            notifyError(errorMessage);
+            console.error("Error en login:", error.response || error);
+        } finally {
+            setPressButton(false);
         }
     };
-
+    
     const redirectHome = () => {
-        location.href = "/";
+        navigate("/");
     };
 
     return (
-        <Container className="login-container">
-            <Row className="login-container mt-4">
-                <Col xs={12} md={6}>
-                    <h1 className='mb-4 text-center logo-title fw-bolder' onClick={redirectHome}>
-                        <img className="me-1" src='../../../src/assets/logo.png' width="100" height="100" alt="logo" />
-                    </h1>
-                    <h2 className="mb-5 fw-bold text-center">Iniciar sesión</h2>
-                    {Object.keys(errors).length > 0 && (
-                        <Alert variant="danger">
-                            {Object.values(errors).map((error, index) => (
-                                <div key={index}>{error}</div>
-                            ))}
-                        </Alert>
-                    )}
-                    <Form className="text-center" onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3" controlId="formBasicEmail">
-                            <Form.Control className="border-secondary border-opacity-50 border-2 p-3 rounded-4 input-login"
-                                type="email"
-                                placeholder="Ingrese su correo"
-                                value={user_email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                isInvalid={!!errors.user_email}
-                            />
-                        </Form.Group>
+        <div className="login-form-container">
+            <div className="text-center mb-4" onClick={redirectHome} style={{ cursor: 'pointer' }}>
+                <img className="me-2" src={logo} width="60" height="60" alt="logo de educativa" />
+                <h1 className="logo-title fw-bolder d-inline-block align-middle">Educativa</h1>
+            </div>
 
-                        <Form.Group className="mb-3" controlId="formBasicPassword">
-                            <Form.Control className="border-2 border-opacity-50 border-secondary p-3 rounded-4 input-login"
-                                type="password"
-                                placeholder="Ingrese su contraseña"
-                                value={user_password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                isInvalid={!!errors.user_password}
-                            />
-                        </Form.Group>
+            <h2 className="mb-4 fw-bold text-center">Acceso de Usuario</h2>
+            
+            <Form onSubmit={handleSubmit} noValidate>
+                {Object.keys(errors).length > 0 && (
+                    <Alert variant="danger" className="text-start py-2">
+                        {Object.values(errors).map((error, index) => (
+                            <div key={index} className="small"> {error}</div>
+                        ))}
+                    </Alert>
+                )}
 
-                        {pressButton ? (
-                            <div className='margin-animacion_Register'>
-                            <l-ping
-                                size="90"
-                                speed="3" 
-                                color="#157347" 
-                            ></l-ping>
-                            </div>):(
-                            <Button type="submit" className="btn w-100 p-3 rounded-4 mt-4 mb-3 fw-bold login-btn btn-success">
-                            Iniciar Sesión
-                            </Button>
-                        )}
+                <InputGroup className="mb-3">
+                    <InputGroup.Text className="icon-prefix">
+                        <FontAwesomeIcon icon={faEnvelope} />
+                    </InputGroup.Text>
+                    <Form.Control
+                        className="input-login"
+                        type="email"
+                        placeholder="Correo electrónico"
+                        value={user_email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        isInvalid={!!errors.user_email}
+                        size="lg"
+                        aria-label="Correo electrónico"
+                    />
+                </InputGroup>
 
-                        <div className="login-link-container">
-                            <span>¿Aún no tienes una cuenta? <a className="text-decoration-none forgotPass-link" href="/register">
-                                Regístrate
-                            </a></span>
+                <InputGroup className="mb-3">
+                    <InputGroup.Text className="icon-prefix">
+                        <FontAwesomeIcon icon={faLock} />
+                    </InputGroup.Text>
+                    <Form.Control
+                        className="input-login"
+                        type="password"
+                        placeholder="Contraseña"
+                        value={user_password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        isInvalid={!!errors.user_password}
+                        size="lg"
+                        aria-label="Contraseña"
+                    />
+                </InputGroup>
 
-                            <a className="text-decoration-none forgotPass-link" href="/">¿Has olvidado tu contraseña?</a>
-                        </div>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <Form.Check
+                        type="checkbox"
+                        label="Recordarme"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        id="rememberMeCheckbox"
+                    />
+                    <a className="small" href="/forgot-password">¿Olvidaste tu contraseña?</a>
+                </div>
 
-                    </Form>
-                </Col>
-            </Row>
-        </Container>
+
+                {pressButton ? (
+                    <div className='text-center py-2'>
+                        <l-ping size="45" speed="2" color="#4f46e5"></l-ping>
+                    </div>
+                ) : (
+                    <Button type="submit" className="btn-login w-100 fw-bold" size="lg">
+                        Iniciar Sesión
+                    </Button>
+                )}
+
+                <div className="text-center mt-4 small">
+                    ¿No tienes cuenta? <a className="fw-bold" href="/register">Regístrate aquí</a>
+                </div>
+            </Form>
+        </div>
     );
 }
 
