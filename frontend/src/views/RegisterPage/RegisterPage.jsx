@@ -9,7 +9,7 @@ function RegisterPage() {
             <Row className="register-container w-100 my-5 mx-auto shadow-lg">
                 <Col md={6} className="register-info-section p-5 d-none d-md-flex flex-column justify-content-center">
                     <h1 className="display-4 fw-bold text-white mb-4">Únete a Educativa</h1>
-                    <p className="lead text-white-75">
+                    <p className="lead text-white">
                         Crea tu cuenta para empezar a disfrutar de todos los beneficios de nuestra plataforma educativa. ¡El proceso es rápido y fácil!
                     </p>
                 </Col>

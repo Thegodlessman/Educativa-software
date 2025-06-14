@@ -217,7 +217,6 @@ function SelectRole({ show, handleClose}) {
       );
 
       localStorage.setItem('token', response.data.tokenSession);
-      console.log(response.data.tokenSession)
 
       notifySuccess("Perfil completado exitosamente");
       handleClose();
