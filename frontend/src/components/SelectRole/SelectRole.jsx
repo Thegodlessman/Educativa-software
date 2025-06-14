@@ -331,7 +331,7 @@ function SelectRole({ show, handleClose}) {
                 <div className="select-group mt-4">
                   <div className="form-group">
                     <select
-                      className="form-select"
+                      className="form-select_select-rol"
                       value={selectedCountry || ""}
                       onChange={(e) => handleCountryChange(e)}
                     >
@@ -346,7 +346,7 @@ function SelectRole({ show, handleClose}) {
 
                   <div className="form-group">
                     <select
-                      className="form-select"
+                      className="form-select_select-rol"
                       value={selectedState || ""}
                       onChange={(e) => handleStateChange(e)}
                       disabled={!selectedCountry}
@@ -362,7 +362,7 @@ function SelectRole({ show, handleClose}) {
 
                   <div className="form-group">
                     <select
-                      className="form-select"
+                      className="form-select_select-rol"
                       value={selectedMuni || ""}
                       onChange={(e) => handleMunicipalityChange(e)}
                       disabled={!selectedState}
@@ -378,7 +378,7 @@ function SelectRole({ show, handleClose}) {
 
                   <div className="form-group">
                     <select
-                      className="form-select"
+                      className="form-select_select-rol"
                       value={selectedParish || ""}
                       onChange={(e) => handleParishChange(e)}
                       disabled={!selectedMuni}
@@ -394,7 +394,7 @@ function SelectRole({ show, handleClose}) {
 
                   <div className="form-group" style={{ flex: "1 1 100%" }}>
                     <select
-                      className="form-select"
+                      className="form-select_select-rol"
                       value={selectedInstitution || ""}
                       onChange={(e) => setSelectedInstitution(e.target.value)}
                       disabled={!selectedParish}
