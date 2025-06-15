@@ -1,55 +1,152 @@
-.landing-container{
-    background-color: var(--primary-color);
-    padding: 20px 0 20px 0;
+/* --- Estilos Generales de Secciones --- */
+.landing-page section {
+    padding: 80px 0;
+}
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #212529;
+}
+.section-subtitle {
+    font-size: 1.15rem;
+    color: #6c757d;
+    max-width: 600px;
+    margin: 0 auto;
+}
+.section-subtitle.text-start {
+    margin: 0;
+}
+
+/* --- Hero Section --- */
+.hero-section {
+    background-color: #f6f0f8;
+    padding: 100px 0;
+}
+.hero-text .lead {
+    color: #495057;
+}
+.hero-image {
+    animation: float 6s ease-in-out infinite;
+}
+@keyframes float {
+	0% { transform: translatey(0px); }
+	50% { transform: translatey(-20px); }
+	100% { transform: translatey(0px); }
+}
+
+/* --- Project Purpose Section --- */
+.project-purpose-section {
+    background-color: #ffffff;
+}
+.uru-logo {
+    max-height: 400px;
+}
+
+
+/* --- Features Section --- */
+.features-section {
+    background-color: #f6f0f8; 
+}
+.feature-card {
+    background-color: #ecd9f3;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    border-radius: 12px;
+    border: 1px solid #ecd9f3;
+    transition: all 0.3s ease;
     height: 100%;
 }
-
-.landing-container-welcome{
-    display: flex;
-    flex-direction: row;
-    background-color: white;
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
 }
-.landing-container-welcome-text{
+.feature-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
     display: flex;
-    flex-direction: column;
-    padding: 60px;
-}
-
-.select-rol_landing-page{
-    margin-top: 15px;
-    display: flex;
-    flex-direction: column;
-}
-
-.welcome-title{
+    justify-content: center;
+    align-items: center;
+    background-color: #e9e7ff;
     color: var(--primary-color);
-    font-weight: 700;
-    font-size: 45px;
+}
+.feature-icon {
+    font-size: 2rem;
+}
+.feature-title {
+    margin-bottom: 0.75rem;
+    font-weight: 600;
 }
 
-.welcome-text{
-    font-weight: 700;
-    font-size: 45px;
+/* --- FAQ Section --- */
+.faq-section {
+    background-color: #f8f9fa;
+}
+.faq-item {
+    margin-bottom: 1rem;
+    border: 1px solid #e4dee6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.accordion-header button {
+    font-weight: 600;
+}
+.accordion-header button:not(.collapsed) {
+    background-color: #f8e7ff;
+    color: var(--primary-color);
+}
+.accordion-header button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(157, 70, 229, 0.25);
 }
 
-.welcome-img{
-    height: 600px;
-    width: 600px;
+/* --- CTA Section --- */
+.cta-section {
+    background-color: #252129;
+    color: #fff;
 }
 
-.select-rol-text_landing-page{
-    color: #797979;
-    font-weight: 400;
-    font-size: 20px;
-}
-
-.select-rol-button_landing-page{
-    margin-top: 20px;
-    width: 43%;
-    height: 40px;
+/* --- Footer Section --- */
+.footer-section {
+    background-color: #212529;
     color: white;
+    padding: 40px 0;
+}
+.footer-section p {
+    margin-bottom: 0.5rem;
+    color: #adb5bd;
+}
+.footer-section p strong {
+    color: #fff;
+}
 
-    border: none;
-    border-radius: 10px;
+
+/* --- Botones --- */
+.btn-landing {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-landing:hover {
+    background-color: var(--primary-color_gradient);
+    border-color: var(--primary-color_gradient);
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+.btn-landing-2{
+    color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-landing-2:hover{
+    text-decoration: none;
     background-color: var(--secondary-color);
+    transform: translateY(-2px);
+    border-color: #fff;
 }
