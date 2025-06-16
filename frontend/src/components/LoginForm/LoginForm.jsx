@@ -18,23 +18,8 @@ function LoginForm() {
     const [pressButton, setPressButton] = useState(false);
     const { setToken } = useContext(ClassContext);
 
-    const validateForm = () => {
-        const newErrors = {};
-        if (!user_email) newErrors.user_email = 'Ingrese su correo, por favor.';
-        else if (!/\S+@\S+\.\S+/.test(user_email)) newErrors.user_email = 'El formato del correo electrónico no es válido.';
-        if (!user_password) newErrors.user_password = 'Ingrese su contraseña, por favor.';
-        else if (user_password.length < 6) newErrors.user_password = 'La contraseña debe tener al menos 6 caracteres.';
-        return newErrors;
-    };
-
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const formErrors = validateForm();
-        if (Object.keys(formErrors).length > 0) {
-            setErrors(formErrors);
-            return;
-        }
-
         setErrors({});
         setPressButton(true);
 
@@ -50,9 +35,23 @@ function LoginForm() {
                 notifyError("Respuesta inesperada del servidor al iniciar sesión.");
             }
         } catch (error) {
-            const errorMessage = error.response?.data?.message || "Error al conectar con el servidor.";
-            notifyError(errorMessage);
-            console.error("Error en login:", error.response || error);
+            if (error.response?.data?.errors) {
+                const backendErrorsArray = error.response.data.errors;
+
+                const fieldErrors = backendErrorsArray.reduce((acc, err) => {
+                    if (!acc[err.field]) {
+                        acc[err.field] = err.msg;
+                    }
+                    return acc;
+                }, {});
+                setErrors(fieldErrors);
+
+                const firstErrorMessage = backendErrorsArray[0]?.msg || "Error de validación.";
+                notifyError(firstErrorMessage);
+
+            } else {
+                notifyError(error.response?.data?.message || "Error al conectar con el servidor.");
+            }
         } finally {
             setPressButton(false);
         }
@@ -72,13 +71,6 @@ function LoginForm() {
             <h2 className="mb-4 fw-bold text-center">Acceso de Usuario</h2>
             
             <Form onSubmit={handleSubmit} noValidate>
-                {Object.keys(errors).length > 0 && (
-                    <Alert variant="danger" className="text-start py-2">
-                        {Object.values(errors).map((error, index) => (
-                            <div key={index} className="small"> {error}</div>
-                        ))}
-                    </Alert>
-                )}
 
                 <InputGroup className="mb-3">
                     <InputGroup.Text className="icon-prefix">

@@ -107,66 +107,53 @@ export const loginUser = async (req, res) => { //* Iniciar Sesión
 };
 
 export const createUser = async (req, res) => { //* Crear Usuario
-    const { user_ced, user_name, user_lastname, user_email, user_password } = req.body;
+    try {
+        const { user_ced, user_name, user_lastname, user_email, user_password } = req.body;
 
-    await check('user_ced').notEmpty().withMessage('La cédula es obligatoria').isNumeric().withMessage("La cédula debe ser numérica").run(req);
-    await check('user_name').notEmpty().withMessage('El nombre es obligatorio').run(req);
-    await check('user_lastname').notEmpty().withMessage('El apellido es obligatorio').run(req);
-    await check('user_email').notEmpty().withMessage('El correo es obligatorio').isEmail().withMessage("El correo no es válido").run(req);
-    await check('user_password').notEmpty().withMessage('La contraseña es obligatoria').run(req);
+        const defaultURL = `${process.env.CLOUDNARY_URL_IMG}educativa/Educativa-Profile`;
+        const passwordHash = await encrypt(user_password);
 
-    const defaultURL = `${process.env.CLOUDNARY_URL_IMG}educativa/Educativa-Profile`;
-    const passwordHash = await encrypt(user_password);
+        const queryRole = `SELECT id_rol FROM "roles" WHERE rol_name = 'usuario'`;
+        const { rows: roleRows } = await pool.query(queryRole);
+        const id_rol = roleRows[0].id_rol;
 
-    // Obtener el ID del rol "Usuario" (ejemplo: 'estudiante')
-    const queryRole = `SELECT id_rol FROM "roles" WHERE rol_name = 'usuario'`;
-    const { rows: roleRows } = await pool.query(queryRole);
-    const id_rol = roleRows[0].id_rol;
+        const query2 = 'SELECT * FROM "users" WHERE user_email = $1 ';
+        const { rowCount: emailCount } = await pool.query(query2, [user_email]);
+        if (emailCount > 0) {
+            return res.status(400).json({ message: "El email ya ha sido registrado" });
+        }
 
-    let result = validationResult(req);
+        const query3 = 'SELECT * FROM "users" WHERE user_ced = $1';
+        const { rowCount: userCount } = await pool.query(query3, [user_ced]);
+        if (userCount > 0) {
+            return res.status(400).json({ message: "La cédula ya ha sido registrada" });
+        }
 
-    if (!result.isEmpty()) {
-        return res.status(400).json({
-            message: "Errores de validación",
-            errors: result.array(),
-        });
+        const { rows, rowCount } = await pool.query(
+            `INSERT INTO "users" (id_user, user_url, user_ced, user_name, user_lastname, user_email, user_password, active_role)
+            VALUES (default, $1, $2, $3, $4, $5, $6, $7) 
+            RETURNING *`,
+            [defaultURL, user_ced, user_name, user_lastname, user_email, passwordHash, id_rol]
+        );
+
+        if (rowCount === 0) {
+            return res.status(404).json({ message: 'Hubo un error al crear el usuario' });
+        }
+
+        const newUser = rows[0];
+
+        await pool.query(
+            'INSERT INTO "roles_users" (id_user, id_rol) VALUES ($1, $2)',
+            [newUser.id_user, id_rol]
+        );
+
+        return res.status(200).json({ message: 'Usuario creado exitosamente', user: newUser });
+
+    } catch (error) {
+        // Un bloque try-catch general es bueno para capturar errores inesperados
+        console.error("Error creando usuario:", error);
+        return res.status(500).json({ message: "Error del servidor" });
     }
-
-    //* Verificar si el email ya está en uso por otro usuario
-    const query2 = 'SELECT * FROM "users" WHERE user_email = $1 ';
-    const { rowCount: emailCount } = await pool.query(query2, [user_email]);
-
-    if (emailCount > 0) {
-        return res.status(400).json({ message: "El email ya ha sido registrado" });
-    }
-
-    //* Verificar si dos personas tienen la misma cédula
-    const query3 = 'SELECT * FROM "users" WHERE user_ced = $1';
-    const { rowCount: userCount } = await pool.query(query3, [user_ced]);
-    if (userCount > 0) {
-        return res.status(400).json({ message: "La cédula ya ha sido registrada" });
-    }
-
-    // Insertar el usuario
-    const { rows, rowCount } = await pool.query(
-        `INSERT INTO "users" (id_user, user_url, user_ced, user_name, user_lastname, user_email, user_password, active_role)
-        VALUES (default, $1, $2, $3, $4, $5, $6, $7) 
-        RETURNING *`,
-        [defaultURL, user_ced, user_name, user_lastname, user_email, passwordHash, id_rol]
-    );
-
-    if (rowCount === 0) {
-        return res.status(404).json({ message: 'Hubo un error al crear el usuario' });
-    }
-
-    const newUser = rows[0];
-
-    await pool.query(
-        'INSERT INTO "roles_users" (id_user, id_rol) VALUES ($1, $2)',
-        [newUser.id_user, id_rol]
-    );
-
-    return res.status(200).json({ message: 'Usuario creado exitosamente', user: newUser });
 };
 
 export const deleteUser = async (req, res) => { //* Borrar usuario
