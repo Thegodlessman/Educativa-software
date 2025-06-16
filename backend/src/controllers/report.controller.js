@@ -7,7 +7,6 @@ const secondaryColor = '#157347';
 
 async function generateHeader(doc) {
     try {
-        // Mantengo la lógica de tu nueva URL para el logo
         const logoUrl = process.env.CLOUDINARY_IMAGE + 'educativa/educativa-logo';
         if (logoUrl) {
             const response = await axios.get(logoUrl, { responseType: 'arraybuffer' });
@@ -150,5 +149,31 @@ export const generateStudentReport = async (req, res) => {
     } catch (error) {
         console.error("Error generando el reporte PDF:", error);
         res.status(500).json({ message: "Error interno del servidor al generar el reporte." });
+    }
+};
+
+
+export const getClassRiskDistribution = async (req, res) => {
+    try {
+        const { roomId } = req.params;
+
+        const distributionQuery = await pool.query(
+            `SELECT
+                rl.risk_name,
+                COUNT(DISTINCT ur.id_user) AS student_count
+            FROM tests t
+            JOIN risk_levels rl ON t.id_risk_level = rl.id_risk_level
+            JOIN user_room ur ON t.id_user_room = ur.id_user_room
+            WHERE ur.id_room = $1
+            GROUP BY rl.risk_name
+            ORDER BY rl.risk_name;`,
+            [roomId]
+        );
+
+        res.json(distributionQuery.rows);
+
+    } catch (error) {
+        console.error("Error obteniendo la distribución de riesgos:", error);
+        res.status(500).json({ message: "Error interno del servidor." });
     }
 };
