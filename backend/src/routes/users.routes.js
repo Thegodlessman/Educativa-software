@@ -1,14 +1,18 @@
 import { Router } from "express";
-import {createUser, 
-    deleteUser, 
-    getUsers, 
-    getUsersById, 
-    loginUser, 
-    updatePassword, 
-    updateUser, 
+import {
+    createUser,
+    deleteUser,
+    getUsers,
+    getUsersById,
+    loginUser,
+    updatePassword,
+    updateUser,
     updateActiveRole,
     getRoles
 } from '../controllers/user.controller.js'
+
+import { validateCreateUser, validateLogin, validateUpdatePassword, validateUpdateUser } from "../middleware/validator.js";
+
 import capitalizeNames from "../middleware/format.js";
 
 const router = Router();
@@ -20,19 +24,19 @@ router.get('/users', getUsers)
 router.get('/users/:id', getUsersById)
 
 //*Iniciar Sesión
-router.post('/login', loginUser)
+router.post('/login', validateLogin, loginUser)
 
 //*Actualizar contraseña
-router.patch('/users/password/:id' , updatePassword)
+router.patch('/users/password/:id', validateUpdatePassword,updatePassword)
 
 //*Crear un usuario
-router.post('/users', capitalizeNames, createUser)
+router.post('/users', capitalizeNames, validateCreateUser, createUser)
 
 //*Borrar un usuario
 router.delete('/users/:id', deleteUser)
 
 //*Actualizar un usuario
-router.put('/users/:id', updateUser);
+router.put('/users/:id', validateUpdateUser, updateUser);
 
 router.patch('/users/update/role/:id', updateActiveRole)
 

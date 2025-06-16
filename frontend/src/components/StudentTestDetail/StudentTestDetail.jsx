@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, Tab, Table, Card, ListGroup, Spinner, Alert, Button } from 'react-bootstrap';
-import { BsFileEarmarkPdf, BsYoutube, BsLink45Deg, BsQuestionCircle, BsExclamationTriangleFill, BsClipboardCheck, BsGraphUp, BsLightningCharge, BsXCircle, BsCheckCircle, BsClockHistory, BsCollectionPlay, BsArrowLeft } from "react-icons/bs";
+import {BsDownload, BsFileEarmarkPdf, BsYoutube, BsLink45Deg, BsQuestionCircle, BsExclamationTriangleFill, BsClipboardCheck, BsGraphUp, BsLightningCharge, BsXCircle, BsCheckCircle, BsClockHistory, BsCollectionPlay, BsArrowLeft } from "react-icons/bs";
 import axios from 'axios';
 import './StudentTestDetail.css';
+import { notifyError } from '../../utils/notify';
 
 const getMaterialIcon = (materialType) => {
     if (!materialType) return <BsQuestionCircle size={20} className="me-2" />;
@@ -39,6 +40,7 @@ function StudentTestDetail({ studentData, onClose }) {
     const [errorMetrics, setErrorMetrics] = useState('');
     const [errorMaterials, setErrorMaterials] = useState('');
     const [errorAnswers, setErrorAnswers] = useState('');
+    const [isDownloading, setIsDownloading] = useState(false)
 
     useEffect(() => {
         if (studentData && studentData.id_test) {
@@ -97,6 +99,40 @@ function StudentTestDetail({ studentData, onClose }) {
     if (!studentData) {
         return null;
     }
+
+    const handleDownloadReport = async () => {
+        if (!studentData.id_test) return;
+        setIsDownloading(true);
+        try {
+            const response = await axios.get(
+                `${import.meta.env.VITE_BACKEND_URL}reports/test/${studentData.id_test}`,
+                { responseType: 'blob' } 
+            );
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = `reporte.pdf`;
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+                if (filenameMatch.length === 2) filename = filenameMatch[1];
+            }
+            
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+            notifyError("Error al descargar el reporte:", error);
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
 
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
@@ -200,6 +236,12 @@ function StudentTestDetail({ studentData, onClose }) {
                         </Tab>
                     </Tabs>
                 </Card.Body>
+                <Card.Footer>
+                <Button variant="light" onClick={handleDownloadReport} disabled={isDownloading}>
+                        <BsDownload className="me-2" />
+                        {isDownloading ? 'Descargando...' : 'Descargar resultados de la prueba'}
+                </Button>
+                </Card.Footer>
             </Card>
         </div>
     );

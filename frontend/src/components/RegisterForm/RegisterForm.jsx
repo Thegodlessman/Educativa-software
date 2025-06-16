@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, Button, Alert, InputGroup, Row, Col } from "react-bootstrap";
+import { Form, Button, InputGroup, Row, Col } from "react-bootstrap";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ping } from "ldrs";
@@ -22,25 +22,11 @@ function RegisterForm() {
     const [errors, setErrors] = useState({});
     const [pressButton, setPressButton] = useState(false);
 
-    const validateForm = () => {
-        const newErrors = {};
-        if (!user_name) newErrors.user_name = "Ingrese su nombre, por favor.";
-        if (!user_lastname) newErrors.user_lastname = "Ingrese su apellido, por favor.";
-        if (!user_ced) newErrors.user_ced = "Ingrese su cédula, por favor.";
-        if (!user_email) newErrors.user_email = "Ingrese su correo, por favor.";
-        else if (!/\S+@\S+\.\S+/.test(user_email)) newErrors.user_email = "El formato del correo es inválido.";
-        if (!user_password) newErrors.user_password = "Ingrese una contraseña, por favor.";
-        else if (user_password.length < 6) newErrors.user_password = "La contraseña debe tener al menos 6 caracteres.";
-        if (confirmPassword !== user_password) newErrors.confirmPassword = "Las contraseñas no coinciden.";
-        return newErrors;
-    };
-
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const formErrors = validateForm();
-        if (Object.keys(formErrors).length > 0) {
-            setErrors(formErrors);
-            notifyError("Por favor, corrige los errores del formulario.");
+
+        if (user_password !== confirmPassword) {
+            notifyError("Las contraseñas no coinciden.");
             return;
         }
 
@@ -50,14 +36,29 @@ function RegisterForm() {
         const userData = { user_ced, user_name, user_lastname, user_email, user_password };
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}users`, userData);
-            console.log(response.data);
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}users`, userData);
             notifySuccess("¡Te has registrado exitosamente!");
             setTimeout(() => {
                 navigate("/login");
             }, 1500);
         } catch (error) {
-            notifyError(error.response?.data?.message || "Error en el registro.");
+            if (error.response?.data?.errors) {
+                const backendErrorsArray = error.response.data.errors;
+
+                const fieldErrors = backendErrorsArray.reduce((acc, err) => {
+                    if (!acc[err.field]) {
+                        acc[err.field] = err.msg;
+                    }
+                    return acc;
+                }, {});
+                setErrors(fieldErrors);
+
+                const firstErrorMessage = backendErrorsArray[0]?.msg || "Error de validación.";
+                notifyError(firstErrorMessage);
+
+            } else {
+                notifyError(error.response?.data?.message || "Error en el registro.");
+            }
             setPressButton(false);
         }
     };
@@ -78,38 +79,56 @@ function RegisterForm() {
             <Form noValidate onSubmit={handleSubmit}>
                 <Row>
                     <Col sm={6}>
-                        <InputGroup className="mb-3">
-                            <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faUser} /></InputGroup.Text>
-                            <Form.Control type="text" placeholder="Nombre" value={user_name} onChange={(e) => setName(e.target.value)} isInvalid={!!errors.user_name} />
-                        </InputGroup>
+                        <Form.Group className="mb-3">
+                            <InputGroup>
+                                <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faUser} /></InputGroup.Text>
+                                <Form.Control type="text" placeholder="Nombre" value={user_name} onChange={(e) => setName(e.target.value)} isInvalid={!!errors.user_name} />
+                                <Form.Control.Feedback type="invalid">{errors.user_name}</Form.Control.Feedback>
+                            </InputGroup>
+                        </Form.Group>
                     </Col>
                     <Col sm={6}>
-                        <InputGroup className="mb-3">
-                            <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faUser} /></InputGroup.Text>
-                            <Form.Control type="text" placeholder="Apellido" value={user_lastname} onChange={(e) => setLastName(e.target.value)} isInvalid={!!errors.user_lastname} />
-                        </InputGroup>
+                        <Form.Group className="mb-3">
+                            <InputGroup>
+                                <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faUser} /></InputGroup.Text>
+                                <Form.Control type="text" placeholder="Apellido" value={user_lastname} onChange={(e) => setLastName(e.target.value)} isInvalid={!!errors.user_lastname} />
+                                <Form.Control.Feedback type="invalid">{errors.user_lastname}</Form.Control.Feedback>
+                            </InputGroup>
+                        </Form.Group>
                     </Col>
                 </Row>
-                
-                <InputGroup className="mb-3">
-                    <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faIdCard} /></InputGroup.Text>
-                    <Form.Control type="text" placeholder="Cédula de Identidad" value={user_ced} onChange={(e) => setCed_user(e.target.value)} isInvalid={!!errors.user_ced} />
-                </InputGroup>
 
-                <InputGroup className="mb-3">
-                    <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faEnvelope} /></InputGroup.Text>
-                    <Form.Control type="email" placeholder="Correo Electrónico" value={user_email} onChange={(e) => setEmail(e.target.value)} isInvalid={!!errors.user_email} />
-                </InputGroup>
+                <Form.Group className="mb-3">
+                    <InputGroup>
+                        <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faIdCard} /></InputGroup.Text>
+                        <Form.Control type="text" placeholder="Cédula de Identidad" value={user_ced} onChange={(e) => setCed_user(e.target.value)} isInvalid={!!errors.user_ced} />
+                        <Form.Control.Feedback type="invalid">{errors.user_ced}</Form.Control.Feedback>
+                    </InputGroup>
+                </Form.Group>
 
-                <InputGroup className="mb-3">
-                    <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faLock} /></InputGroup.Text>
-                    <Form.Control type="password" placeholder="Contraseña" value={user_password} onChange={(e) => setPassword(e.target.value)} isInvalid={!!errors.user_password} />
-                </InputGroup>
+                <Form.Group className="mb-3">
+                    <InputGroup>
+                        <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faEnvelope} /></InputGroup.Text>
+                        <Form.Control type="email" placeholder="Correo Electrónico" value={user_email} onChange={(e) => setEmail(e.target.value)} isInvalid={!!errors.user_email} />
+                        <Form.Control.Feedback type="invalid">{errors.user_email}</Form.Control.Feedback>
+                    </InputGroup>
+                </Form.Group>
 
-                <InputGroup className="mb-3">
-                    <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faLock} /></InputGroup.Text>
-                    <Form.Control type="password" placeholder="Confirmar Contraseña" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} isInvalid={!!errors.confirmPassword} />
-                </InputGroup>
+                <Form.Group className="mb-3">
+                    <InputGroup>
+                        <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faLock} /></InputGroup.Text>
+                        <Form.Control type="password" placeholder="Contraseña" value={user_password} onChange={(e) => setPassword(e.target.value)} isInvalid={!!errors.user_password} />
+                        <Form.Control.Feedback type="invalid">{errors.user_password}</Form.Control.Feedback>
+                    </InputGroup>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                    <InputGroup>
+                        <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faLock} /></InputGroup.Text>
+                        <Form.Control type="password" placeholder="Confirmar Contraseña" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} isInvalid={!!errors.confirmPassword} />
+                        <Form.Control.Feedback type="invalid">{errors.confirmPassword}</Form.Control.Feedback>
+                    </InputGroup>
+                </Form.Group>
 
                 {pressButton ? (
                     <div className='text-center py-2'>
