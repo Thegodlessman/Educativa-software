@@ -1,0 +1,70 @@
+.auth-form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f2f5;
+    padding: 1rem;
+}
+
+.auth-form-card {
+    width: 100%;
+    max-width: 450px;
+    border-radius: 15px;
+    border: none;
+}
+
+.auth-form-logo {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 0.5rem;
+}
+
+.auth-form-card h2 {
+    color: #333;
+    font-weight: 700;
+}
+
+
+.auth-form-button {
+    border: none;
+    cursor: pointer;
+    font-family: inherit; 
+
+    background-color: #8552aa; 
+    color: white; 
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px; 
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.auth-form-button:hover,
+.auth-form-button:focus,
+.auth-form-button:active,
+.auth-form-button:active:focus {
+    background-color: #6a418a !important;
+    border-color: #6a418a !important;
+    box-shadow: none !important;
+    outline: none !important; 
+}
+
+.auth-form-button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+
+.auth-form-button.btn-green {
+    background-color: #157347;
+    border-color: #157347;
+}
+
+.auth-form-button.btn-green:hover,
+.auth-form-button.btn-green:focus,
+.auth-form-button.btn-green:active,
+.auth-form-button.btn-green:active:focus {
+    background-color: #105a37 !important;
+    border-color: #105a37 !important;
+}

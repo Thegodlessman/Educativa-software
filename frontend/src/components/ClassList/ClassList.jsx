@@ -1,6 +1,6 @@
 import { useContext, useState, useEffect } from "react";
 import { ClassContext } from "../../context/ClassContext";
-import { Card, Spinner, Button, Table, Tabs, Tab } from "react-bootstrap";
+import { Card, Spinner, Button, Alert, Tabs, Tab } from "react-bootstrap";
 import { BsArrowLeft, BsClipboard, BsGraphUp, BsPersonCircle, BsCalendarEvent, BsTrophy, BsShieldExclamation } from "react-icons/bs";
 import './ClassList.css';
 import { notifyError, notifySuccess, notifyWarning, notifyInfo } from '../../utils/notify.js'
@@ -282,7 +282,7 @@ function ClassList() {
                   </Tab>
                   <Tab
                     eventKey="class-stats"
-                    title={<><BsGraphUp className="me-2" />Estadísticas del Aula</>}
+                    title={<><BsGraphUp className="me-2" />Estadísticas de la clase</>}
                   >
                     <div className="p-2">
                       {loadingChart ? (
@@ -313,7 +313,6 @@ function ClassList() {
                   <div className="text-center text-success">
                     <h4>¡Prueba completada!</h4>
                     {studentTestStatus.finalScore !== null && <p>Puntuación: {studentTestStatus.finalScore}</p>}
-                    {studentTestStatus.riskName && <p>Nivel de riesgo: <span className={`risk-level risk-level-${studentTestStatus.riskName.toLowerCase().replace(/\s+/g, '-')}`}>{studentTestStatus.riskName}</span></p>}
                     <p className="text-muted mt-3">Consulta detalles con tu profesor.</p>
                   </div>
                 ) : studentTestStatus?.isAssigned === false && !studentTestStatus?.testId ? (
