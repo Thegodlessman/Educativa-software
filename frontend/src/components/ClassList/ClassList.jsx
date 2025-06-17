@@ -1,12 +1,13 @@
 import { useContext, useState, useEffect } from "react";
 import { ClassContext } from "../../context/ClassContext";
-import { Card, Spinner, Button, Table } from "react-bootstrap";
-import { BsArrowLeft } from "react-icons/bs";
+import { Card, Spinner, Button, Alert, Tabs, Tab } from "react-bootstrap";
+import { BsArrowLeft, BsClipboard, BsGraphUp, BsPersonCircle, BsCalendarEvent, BsTrophy, BsShieldExclamation } from "react-icons/bs";
 import './ClassList.css';
 import { notifyError, notifySuccess, notifyWarning, notifyInfo } from '../../utils/notify.js'
 import GameTest from '../GameTest/GameTest';
 import StudentTestDetail from '../StudentTestDetail/StudentTestDetail.jsx';
-import axios from 'axios';
+import axios from 'axios';;
+import RiskDistributionChart from '../RiskDistributionChar/RiskDistributionChart.jsx';
 
 function ClassList() {
   const { classes, loading, userData } = useContext(ClassContext);
@@ -24,6 +25,9 @@ function ClassList() {
 
   const [selectedStudentForDetail, setSelectedStudentForDetail] = useState(null);
 
+  const [chartData, setChartData] = useState([]);
+  const [loadingChart, setLoadingChart] = useState(false);
+
   useEffect(() => {
     if (selectedRoom && userData?.id_user && userData?.rol_name) {
       const { id_room } = selectedRoom;
@@ -33,14 +37,27 @@ function ClassList() {
 
       if (rol_name === "Profesor") {
         setLoadingStudentsTeacherView(true);
-        setStudentsEvaluated([])
-        axios.get(`${import.meta.env.VITE_BACKEND_URL}test/room/${selectedRoom.id_room}`) 
+        setStudentsEvaluated([]);
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}test/room/${id_room}`)
           .then((res) => setStudentsEvaluated(res.data))
           .catch((err) => {
-            notifyError("Error al cargar estudiantes evaluados:" + (err.response?.data?.message || err.message));
+            notifyError("Error al cargar estudiantes:" + (err.response?.data?.message || err.message));
             setStudentsEvaluated([]);
           })
           .finally(() => setLoadingStudentsTeacherView(false));
+
+        setLoadingChart(true);
+        setChartData([]);
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}reports/class/${id_room}/risk-distribution`)
+          .then(response => {
+            setChartData(response.data);
+          })
+          .catch(err => {
+            console.error("Error fetching chart data:", err);
+          })
+          .finally(() => {
+            setLoadingChart(false);
+          });
       }
 
       if (rol_name === "Estudiante") {
@@ -50,7 +67,7 @@ function ClassList() {
           try {
             const token = localStorage.getItem('token');
             const response = await axios.get(
-              `${import.meta.env.VITE_BACKEND_URL}test/status/${id_room}/${id_user}`, 
+              `${import.meta.env.VITE_BACKEND_URL}test/status/${id_room}/${id_user}`,
               { headers: { 'Authorization': `Bearer ${token}` } }
             );
             setStudentTestStatus(response.data);
@@ -82,7 +99,7 @@ function ClassList() {
     );
   }
 
-  if (!selectedStudentForDetail && !selectedRoom && classes.length === 0) { 
+  if (!selectedStudentForDetail && !selectedRoom && classes.length === 0) {
     return (
       <div className="d-flex justify-content-center align-items-center mt-5">
         {userData.rol_name === "Profesor" ? (
@@ -213,47 +230,72 @@ function ClassList() {
           <h2 className="mb-4">{selectedRoom.room_grate} "{selectedRoom.secc_room.trim()}" - {selectedRoom.insti_name}</h2>
           <div className="bg-white p-4 shadow rounded">
             {userData.rol_name === "Profesor" ? (
-              <>
-                {loadingStudentsTeacherView ? (
-                  <div className="text-center"><Spinner animation="border" /><p className="mt-2">Cargando...</p></div>
-                ) : (
-                  <Table striped bordered hover responsive className="evaluated-students-table">
-                    <thead className="table-dark">
-                      <tr>
-                        <th>#</th>
-                        <th>Nombre del estudiante</th>
-                        <th>Puntuación Final</th>
-                        <th>Nivel de Riesgo</th>
-                        <th>Fecha Test</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {studentsEvaluated.length === 0 ? (
-                        <tr><td colSpan="5" className="text-center no-students-row">No hay estudiantes evaluados.</td></tr>
+              <div className="bg-white p-4 shadow rounded">
+                <Tabs defaultActiveKey="student-list" id="teacher-dashboard-tabs" className="mb-3 nav-tabs-custom">
+                  <Tab
+                    eventKey="student-list"
+                    title={<><BsClipboard className="me-2" />Lista de Estudiantes</>}
+                  >
+                    {loadingStudentsTeacherView ? (
+                      <div className="text-center py-5"><Spinner animation="border" /><p className="mt-2">Cargando...</p></div>
+                    ) : (
+                      <div className="student-list">
+                        {studentsEvaluated.length === 0 ? (
+                          <Alert variant="info" className="text-center">No hay estudiantes evaluados en esta clase todavía.</Alert>
+                        ) : (
+                          studentsEvaluated.map((student) => (
+                            <div
+                              key={student.id_user || student.id_test}
+                              className={`student-card ${student.id_test ? 'clickable' : 'disabled'}`}
+                              onClick={() => student.id_test && handleShowStudentDetail(student)}
+                            >
+                              <div className="student-card-info">
+                                <BsPersonCircle size={30} className="me-3 text-muted" />
+                                <div>
+                                  <div className="student-name">{student.student_name || 'N/A'}</div>
+                                  <div className="test-date">
+                                    <BsCalendarEvent className="me-2" />
+                                    {student.id_test && student.test_date ? new Date(student.test_date).toLocaleDateString('es-VE') : <span className="text-muted">Prueba no realizada</span>}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="student-card-metrics">
+                                <div className="metric-item">
+                                  <span><BsTrophy className="me-2" /> Puntuación</span>
+                                  <strong>{student.id_test && student.final_score !== null ? student.final_score : 'N/A'}</strong>
+                                </div>
+                                <div className="metric-item">
+                                  <span><BsShieldExclamation className="me-2" /> Riesgo</span>
+                                  {student.id_test && student.risk_name ? (
+                                    <span className={`risk-badge risk-level-${student.risk_name.toLowerCase().replace(/\s+/g, '-')}`}>
+                                      {student.risk_name}
+                                    </span>
+                                  ) : (
+                                    <strong>N/A</strong>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>)}
+                  </Tab>
+                  <Tab
+                    eventKey="class-stats"
+                    title={<><BsGraphUp className="me-2" />Estadísticas de la clase</>}
+                  >
+                    <div className="p-2">
+                      {loadingChart ? (
+                        <div className="d-flex justify-content-center align-items-center py-5">
+                          <Spinner animation="border" /><p className="ms-2 mb-0">Cargando gráfico...</p>
+                        </div>
                       ) : (
-                        studentsEvaluated.map((student, index) => (
-                          <tr
-                            key={student.id_user || `student-${index}`}
-                            onClick={() => handleShowStudentDetail(student)}
-                            style={{ cursor: student.id_test ? 'pointer' : 'default' }}
-                            className={student.id_test ? 'clickable-row' : ''}
-                          >
-                            <td>{index + 1}</td>
-                            <td>{student.student_name || 'N/A'}</td>
-                            <td>
-                              {student.id_test && student.final_score !== null ? student.final_score : <span className="text-muted">Pendiente</span>}
-                            </td>
-                            <td className={student.id_test && student.risk_name ? `risk-level risk-level-${student.risk_name.toLowerCase().replace(/\s+/g, '-')}` : ''}>
-                              {student.id_test && student.risk_name ? student.risk_name : <span className="text-muted">N/A</span>}
-                            </td>
-                            <td>{student.id_test && student.test_date ? new Date(student.test_date).toLocaleDateString('es-VE') : <span className="text-muted">N/A</span>}</td>
-                          </tr>
-                        ))
+                        <RiskDistributionChart chartData={chartData} />
                       )}
-                    </tbody>
-                  </Table>
-                )}
-              </>
+                    </div>
+                  </Tab>
+                </Tabs>
+              </div>
             ) : userData.rol_name === "Estudiante" ? (
               <>
                 {loadingTestStatusStudentView ? (
@@ -271,7 +313,6 @@ function ClassList() {
                   <div className="text-center text-success">
                     <h4>¡Prueba completada!</h4>
                     {studentTestStatus.finalScore !== null && <p>Puntuación: {studentTestStatus.finalScore}</p>}
-                    {studentTestStatus.riskName && <p>Nivel de riesgo: <span className={`risk-level risk-level-${studentTestStatus.riskName.toLowerCase().replace(/\s+/g, '-')}`}>{studentTestStatus.riskName}</span></p>}
                     <p className="text-muted mt-3">Consulta detalles con tu profesor.</p>
                   </div>
                 ) : studentTestStatus?.isAssigned === false && !studentTestStatus?.testId ? (

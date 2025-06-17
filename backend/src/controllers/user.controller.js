@@ -1,7 +1,9 @@
 import { pool } from "../db.js";
+import { sendPasswordResetEmail } from '../utils/mailer.js';
 import { check, validationResult } from "express-validator";
 import { encrypt, compare } from "../helpers/handleBcrypt.js";
 import { tokenSign } from "../helpers/generateToken.js";
+import { randomBytes, createHash } from 'crypto';
 
 export const getUsers = async (req, res) => { //* Obtener todos los usuarios
     const { rows } = await pool.query('SELECT * FROM "users"');
@@ -312,4 +314,70 @@ export const updateActiveRole = async (req, res) => {
 export const getRoles = async (req, res) => {
     const { rows } = await pool.query('SELECT * FROM "roles"');
     res.json({ roles: rows });
+};
+
+export const forgotPassword = async (req, res) => {
+    try {
+        const { user_email } = req.body;
+        const userResult = await pool.query('SELECT * FROM users WHERE user_email = $1', [user_email]);
+
+        if (userResult.rowCount === 0) {
+            return res.status(200).json({ message: "Si existe una cuenta asociada a este correo, se ha enviado un enlace de restablecimiento." });
+        }
+        
+        const user = userResult.rows[0];
+
+        const resetToken = randomBytes(32).toString('hex');
+        
+        const hashedToken = createHash('sha256').update(resetToken).digest('hex');
+            
+        const tokenExpires = new Date(Date.now() + 15 * 60 * 1000);
+
+        await pool.query(
+            'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE id_user = $3',
+            [hashedToken, tokenExpires, user.id_user]
+        );
+
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+        await sendPasswordResetEmail(user.user_email, resetUrl);
+        
+        res.json({ message: "Si existe una cuenta asociada a este correo, se ha enviado un enlace de restablecimiento." });
+
+    } catch (error) {
+        console.error("Error en la función forgotPassword:", error);
+        res.status(500).json({ message: "Error interno del servidor." });
+    }
+};
+
+
+export const resetPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { password } = req.body;
+
+        const hashedToken = createHash('sha256').update(token).digest('hex');
+
+        const userResult = await pool.query(
+            'SELECT * FROM users WHERE reset_token = $1 AND reset_token_expires > NOW()',
+            [hashedToken]
+        );
+
+        if (userResult.rowCount === 0) {
+            return res.status(400).json({ message: "El token para restablecer la contraseña es inválido o ha expirado." });
+        }
+
+        const user = userResult.rows[0];
+        const newPasswordHash = await encrypt(password);
+
+        await pool.query(
+            'UPDATE users SET user_password = $1, reset_token = NULL, reset_token_expires = NULL WHERE id_user = $2',
+            [newPasswordHash, user.id_user]
+        );
+
+        res.json({ message: "Tu contraseña ha sido actualizada exitosamente." });
+
+    } catch (error) {
+        console.error("Error en la función resetPassword:", error);
+        res.status(500).json({ message: "Error interno del servidor." });
+    }
 };
