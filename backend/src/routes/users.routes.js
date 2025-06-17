@@ -8,10 +8,19 @@ import {
     updatePassword,
     updateUser,
     updateActiveRole,
-    getRoles
+    getRoles,
+    forgotPassword,
+    resetPassword
 } from '../controllers/user.controller.js'
 
-import { validateCreateUser, validateLogin, validateUpdatePassword, validateUpdateUser } from "../middleware/validator.js";
+import { 
+    validateCreateUser, 
+    validateLogin, 
+    validateUpdatePassword, 
+    validateUpdateUser,
+    validateForgotPassword,
+    validateResetPassword
+} from "../middleware/validator.js";
 
 import capitalizeNames from "../middleware/format.js";
 
@@ -41,5 +50,9 @@ router.put('/users/:id', validateUpdateUser, updateUser);
 router.patch('/users/update/role/:id', updateActiveRole)
 
 router.get('/profile/roles', getRoles)
+
+router.post('/forgot-password', validateForgotPassword, forgotPassword);
+
+router.post('/reset-password/:token', validateResetPassword, resetPassword)
 
 export default router; 

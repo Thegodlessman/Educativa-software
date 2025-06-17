@@ -1,4 +1,4 @@
-import { check, validationResult } from 'express-validator';
+import { check, validationResult, param} from 'express-validator';
 
 // Función helper para manejar el resultado de la validación
 const handleValidationErrors = (req, res, next) => {
@@ -62,4 +62,24 @@ export const validateUpdatePassword = [
         .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])/)
         .withMessage('La contraseña debe contener al menos una letra mayúscula, una minúscula, un número y un carácter especial (@$!%*?&).'),
     handleValidationErrors
+];
+
+export const validateForgotPassword = [
+    check('user_email', 'Debe proveer un correo electrónico válido.')
+        .trim()
+        .isEmail(),
+    handleValidationErrors 
+];
+
+export const validateResetPassword = [
+    // Validar el cuerpo de la petición
+    check('password')
+        .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres.')
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])/)
+        .withMessage('La contraseña debe contener al menos una letra mayúscula, una minúscula, un número y un carácter especial (@$!%*?&).'),
+    
+    // Validar el parámetro de la URL
+    param('token', 'El token proporcionado no es válido.').isHexadecimal().isLength({ min: 64, max: 64 }),
+
+    handleValidationErrors 
 ];
