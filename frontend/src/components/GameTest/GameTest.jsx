@@ -11,6 +11,11 @@ import energyBoltImg from '../../assets/game/energy_bolt.png';
 import friendlyShipImg from '../../assets/game/friendly_ship.png';
 import spaceBackgroundImg from '../../assets/game/space_background_scrolling.png';
 
+import shootSfx from '../../assets/game/sfx/shoot.mp3';
+import explosionSfx from '../../assets/game/sfx/explosion.mp3';
+import errorSfx from '../../assets/game/sfx/error.mp3';
+import playerHitSfx from '../../assets/game/sfx/player_hit.mp3';
+
 const PIXI = _PIXI;
 
 const generateUUID = () => crypto.randomUUID ? crypto.randomUUID() : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
@@ -61,6 +66,8 @@ function GameTest({ id_test_actual, userId, onGameEnd, id_room }) {
     const backgroundMusicRef = useRef(null);
     const questionTimerRef = useRef(0);
     const nextQuestionIndexRef = useRef(0);
+
+    const sfx = useRef({});
 
     const gameDifficultySettings = useRef({
         INITIAL_GAMESPEED_Y: 5,
@@ -157,8 +164,18 @@ function GameTest({ id_test_actual, userId, onGameEnd, id_room }) {
         return bullet;
     };
 
+    const playSound = (soundName, volume = 0.5) => {
+        if (sfx.current[soundName]) {
+            sfx.current[soundName].currentTime = 0; // Permite que el sonido se repita rápidamente
+            sfx.current[soundName].volume = volume;
+            sfx.current[soundName].play().catch(e => console.error("Error al reproducir sonido:", e));
+        }
+    };
+
     const createBullet = () => {
         if (!player.current || appRef.current.destroyed || gameState !== 'PLAYING') return;
+
+        playSound('shoot');
         
         let isThreateningTargetInLane = false;
         const playerLaneFactor = (currentLaneIndex.current - 1) * 0.75;
@@ -370,6 +387,7 @@ function GameTest({ id_test_actual, userId, onGameEnd, id_room }) {
                     bullet.graphic.visible = false;
                     bulletsToRemove.add(bullet);
                     if (obstacle.type === 'target') {
+                        playSound('explosion');
                         metrics.current.correct_hits++;
                         setScore(prev => prev + 10);
                         obstacle.isHit = true;
@@ -378,6 +396,7 @@ function GameTest({ id_test_actual, userId, onGameEnd, id_room }) {
                             metrics.current.reactionTimes.push({ obstacleId: obstacle.id, time: Date.now() - obstacle.enteredReactionZoneTime, type: 'hit' });
                         }
                     } else { // type === 'non-target'
+                        playSound('error'); 
                         metrics.current.commission_errors++;
                     }
                 }
@@ -402,6 +421,7 @@ function GameTest({ id_test_actual, userId, onGameEnd, id_room }) {
             }
 
             if (!obstacle.isCollision && obstacle.type === 'target' && checkCollision(player.current, obstacle.graphic)) {
+                playSound('playerHit');
                 metrics.current.collision_errors++;
                 obstacle.isCollision = true;
                 if (obstacle.enteredReactionZoneTime) {
@@ -505,6 +525,16 @@ function GameTest({ id_test_actual, userId, onGameEnd, id_room }) {
         const app = appRef.current;
         const stage = app.stage;
         const ticker = app.ticker;
+
+        sfx.current = {
+            shoot: new Audio(shootSfx),
+            explosion: new Audio(explosionSfx),
+            error: new Audio(errorSfx),
+            playerHit: new Audio(playerHitSfx),
+        };
+        // Precargamos los sonidos para reducir el lag la primera vez que se usan
+        Object.values(sfx.current).forEach(sound => sound.load());
+
         
         stage.removeChildren();
         ticker.stop();
