@@ -8,7 +8,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 // Mapeo de nombres de riesgo 
 const riskColorMap = {
     'Probable': 'rgba(255, 99, 132, 0.8)',      // Rojo
-    'Poco Probable': 'rgba(255, 206, 86, 0.8)',     // Amarillo
+    'Poco probable': 'rgba(255, 206, 86, 0.8)',     // Amarillo
     'Nada probable': 'rgba(75, 192, 192, 0.8)',      // Verde
     'Sin Riesgo': 'rgba(54, 162, 235, 0.8)', // Azul
 };
