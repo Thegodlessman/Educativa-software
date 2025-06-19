@@ -9,6 +9,7 @@ import roomRoutes from './routes/room.routes.js'
 import cloudinaryRoutes from './routes/cloudinary.routes.js'
 import testRouter from './routes/test.routes.js'
 import supportMaterialsRouter from './routes/supportMaterials.routes.js';
+import { calculateRiskProfile } from './helpers/riskCalculator.js';
 import reportRouter from './routes/reporter.routes.js';
 import { pool } from "./db.js";
 import { resolveMx } from 'dns';
@@ -52,86 +53,52 @@ io.on('connection', (socket) => {
     });
 
     socket.on('submitGameTestResults', async (receivedMetrics) => {
-        console.log(`Métricas de juego recibidas del cliente ${socket.id}:`);
-        console.log(JSON.stringify(receivedMetrics, null, 2));
+        console.log(`Métricas recibidas del cliente ${socket.id}:`);
 
-        const {
-            id_test_para_actualizar,
-            userId,
-            id_room,
-            totalGameDuration,
-            score,
-            reactionTimes,
-            correct_hits,
-            collision_errors,
-            omission_errors,
-            commission_errors,
-            missed_shots
-        } = receivedMetrics;
+        const { id_test_para_actualizar, userId, id_room } = receivedMetrics;
 
         if (!id_test_para_actualizar) {
-            console.error("Error: No se recibió id_test_para_actualizar desde el frontend.");
-            socket.emit('gameTestError', { message: "Error: Falta ID de la prueba para guardar resultados." });
+            console.error("Error: Falta ID de prueba.");
+            socket.emit('gameTestError', { message: "Error crítico: Falta ID de la prueba." });
             return;
         }
 
-        let averageReactionTimeMs = null;
-        if (reactionTimes && Array.isArray(reactionTimes) && reactionTimes.length > 0) {
-            const sum = reactionTimes.reduce((acc, rt) => acc + rt.time, 0);
-            averageReactionTimeMs = sum / reactionTimes.length;
-        }
-
-        const gameDurationSeconds = totalGameDuration > 0 ? (totalGameDuration / 1000) : 0;
-
-        let riskScore = 0;
-        if (omission_errors > 3) riskScore += 3;
-        if (commission_errors > 1) riskScore += 2;
-        if (averageReactionTimeMs > 700) riskScore += 2;
-
-        let inferredRiskLevelName = "Nada probable";
-        let recommendationText = "Rendimiento dentro de los parámetros esperados.";
-        if (riskScore >= 6) {
-            inferredRiskLevelName = "Muy probable";
-            recommendationText = "Se recomienda evaluación profesional detallada.";
-        } else if (riskScore >= 3) {
-            inferredRiskLevelName = "Poco probable";
-            recommendationText = "Se sugiere observación y seguimiento del rendimiento atencional.";
-        }
-
+        const riskProfile = calculateRiskProfile(receivedMetrics);
         const client = await pool.connect();
         try {
             await client.query('BEGIN');
 
-            const riskLevelQuery = await client.query('SELECT id_risk_level FROM risk_levels WHERE risk_name = $1', [inferredRiskLevelName]);
+            const riskLevelQuery = await client.query('SELECT id_risk_level FROM risk_levels WHERE risk_name = $1', [riskProfile.riskLevelName]);
             if (riskLevelQuery.rows.length === 0) {
-                throw new Error(`Nivel de riesgo "${inferredRiskLevelName}" no encontrado en la base de datos.`);
+                throw new Error(`Nivel de riesgo "${riskProfile.riskLevelName}" no encontrado.`);
             }
             const id_risk_level = riskLevelQuery.rows[0].id_risk_level;
 
             const testUpdateQuery = `
                 UPDATE tests SET id_risk_level = $1, final_score = $2, recommendation = $3, test_date = NOW() WHERE id_test = $4;
             `;
-            await client.query(testUpdateQuery, [id_risk_level, score, recommendationText, id_test_para_actualizar]);
+            await client.query(testUpdateQuery, [id_risk_level, receivedMetrics.score, riskProfile.recommendation, id_test_para_actualizar]);
 
             const metricsInsertQuery = `
                 INSERT INTO test_metrics (
                     id_test, reaction_time_avg, correct_hits, 
                     collision_errors, omission_errors, commission_errors, 
-                    missed_shots, total_time
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+                    missed_shots, total_time, reaction_time_variability
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
             `;
-            
-            const rMS = missed_shots - correct_hits;
+            const rMS = (receivedMetrics.missed_shots || 0) - (receivedMetrics.correct_hits || 0);
+            const gameDurationSeconds = (receivedMetrics.totalGameDuration || 0) > 0 ? (receivedMetrics.totalGameDuration / 1000) : 0;
 
             await client.query(metricsInsertQuery, [
                 id_test_para_actualizar,
-                averageReactionTimeMs ? parseFloat(averageReactionTimeMs.toFixed(2)) : null,
-                correct_hits || 0,
-                collision_errors || 0,
-                omission_errors || 0,
-                commission_errors || 0,
-                rMS || 0,
-                gameDurationSeconds ? parseFloat(gameDurationSeconds.toFixed(2)) : null
+                parseFloat(riskProfile.analytics.avgReactionTime) || null,
+                receivedMetrics.correct_hits || 0,
+                receivedMetrics.collision_errors || 0,
+                receivedMetrics.omission_errors || 0,
+                receivedMetrics.commission_errors || 0,
+                rMS,
+                gameDurationSeconds ? parseFloat(gameDurationSeconds.toFixed(2)) : null,
+                parseFloat(riskProfile.analytics.reactionTimeVariability) || null
             ]);
 
             const { questionsAnswered } = receivedMetrics;
@@ -146,14 +113,14 @@ io.on('connection', (socket) => {
 
             socket.emit('gameTestAnalysisResult', {
                 userId, id_room, id_test: id_test_para_actualizar,
-                inferredRiskLevel: inferredRiskLevelName,
-                recommendation: recommendationText
+                inferredRiskLevel: riskProfile.riskLevelName,
+                recommendation: riskProfile.recommendation
             });
 
         } catch (error) {
             if (client) await client.query('ROLLBACK');
-            console.error("Error al guardar datos del juego en la base de datos:", error);
-            socket.emit('gameTestError', { message: "Error interno al procesar los resultados del juego." });
+            console.error("Error procesando resultados del juego:", error);
+            socket.emit('gameTestError', { message: "Error interno al procesar los resultados." });
         } finally {
             if (client) client.release();
         }
