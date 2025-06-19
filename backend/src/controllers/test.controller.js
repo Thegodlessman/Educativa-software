@@ -46,23 +46,32 @@ export const createTest = async (req, res) => {
 export const getTestsByRoom = async (req, res) => {
     try {
         const { id_room } = req.params;
-
         const query = `
-        SELECT 
-            u.id_user,
-            CONCAT(u.user_name,' ',u.user_lastname) AS student_name,
-            t.id_test,
-            t.id_risk_level,
-            rl.risk_name,
-            t.final_score,
-            t.test_date,
-            t.recommendation
-        FROM user_room ur
-        INNER JOIN users u ON ur.id_user = u.id_user
-        LEFT JOIN tests t ON t.id_user_room = ur.id_user_room AND ur.id_room = $1 -- Asegurar que el test pertenezca a ESTA sala
-        LEFT JOIN risk_levels rl ON t.id_risk_level = rl.id_risk_level
-        WHERE ur.id_room = $1
-        ORDER BY u.user_lastname ASC, u.user_name ASC;`; 
+            SELECT 
+                u.id_user,
+                CONCAT(u.user_name, ' ', u.user_lastname) AS student_name,
+                t.id_test,
+                t.id_risk_level,
+                t.final_score,
+                t.test_date,
+                t.recommendation,
+                rl.risk_name,
+                tm.id_test_metric,
+                tm.reaction_time_avg,
+                tm.correct_hits,
+                tm.collision_errors,
+                tm.omission_errors,
+                tm.commission_errors,
+                tm.missed_shots,
+                tm.total_time
+            FROM user_room ur
+            JOIN users u ON ur.id_user = u.id_user
+            LEFT JOIN tests t ON t.id_user_room = ur.id_user_room
+            LEFT JOIN risk_levels rl ON t.id_risk_level = rl.id_risk_level
+            LEFT JOIN test_metrics tm ON t.id_test = tm.id_test
+            WHERE ur.id_room = $1
+            ORDER BY u.user_lastname ASC, u.user_name ASC;
+        `;
 
         const { rows } = await pool.query(query, [id_room]);
         res.status(200).json(rows);
@@ -71,6 +80,7 @@ export const getTestsByRoom = async (req, res) => {
         res.status(500).json({ error: 'Error al obtener los tests' });
     }
 };
+
 
 export const setStartTest = async (req, res) => {
     const { id_user, id_room } = req.body;

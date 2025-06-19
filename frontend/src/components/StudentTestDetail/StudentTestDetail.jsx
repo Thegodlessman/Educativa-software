@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, Tab, Table, Card, ListGroup, Spinner, Alert, Button } from 'react-bootstrap';
-import {BsDownload, BsFileEarmarkPdf, BsYoutube, BsLink45Deg, BsQuestionCircle, BsExclamationTriangleFill, BsClipboardCheck, BsGraphUp, BsLightningCharge, BsXCircle, BsCheckCircle, BsClockHistory, BsCollectionPlay, BsArrowLeft } from "react-icons/bs";
+import { BsDownload, BsFileEarmarkPdf, BsYoutube, BsLink45Deg, BsQuestionCircle, BsExclamationTriangleFill, BsClipboardCheck, BsGraphUp, BsLightningCharge, BsXCircle, BsCheckCircle, BsClockHistory, BsCollectionPlay, BsArrowLeft, BsMouse2, BsEyeglasses, BsHandIndexThumb } from "react-icons/bs";
 import axios from 'axios';
 import './StudentTestDetail.css';
 import { notifyError } from '../../utils/notify';
@@ -31,33 +31,16 @@ const renderAnswer = (answer) => {
 
 
 function StudentTestDetail({ studentData, onClose }) {
-    const [testMetrics, setTestMetrics] = useState(null);
     const [supportMaterials, setSupportMaterials] = useState([]);
     const [questionAnswers, setQuestionAnswers] = useState([]);
-    const [loadingMetrics, setLoadingMetrics] = useState(false);
     const [loadingMaterials, setLoadingMaterials] = useState(false);
     const [loadingAnswers, setLoadingAnswers] = useState(false);
-    const [errorMetrics, setErrorMetrics] = useState('');
     const [errorMaterials, setErrorMaterials] = useState('');
     const [errorAnswers, setErrorAnswers] = useState('');
     const [isDownloading, setIsDownloading] = useState(false)
 
     useEffect(() => {
         if (studentData && studentData.id_test) {
-            setLoadingMetrics(true);
-            setErrorMetrics('');
-            axios.get(`${import.meta.env.VITE_BACKEND_URL}test-metrics/${studentData.id_test}`)
-                .then(response => {
-                    setTestMetrics(response.data);
-                })
-                .catch(err => {
-                    console.error("Error fetching test metrics:", err);
-                    setErrorMetrics("No se pudieron cargar las métricas detalladas del test.");
-                })
-                .finally(() => {
-                    setLoadingMetrics(false);
-                });
-
             setLoadingAnswers(true);
             setErrorAnswers('');
             axios.get(`${import.meta.env.VITE_BACKEND_URL}test/${studentData.id_test}/answers`)
@@ -106,7 +89,7 @@ function StudentTestDetail({ studentData, onClose }) {
         try {
             const response = await axios.get(
                 `${import.meta.env.VITE_BACKEND_URL}reports/test/${studentData.id_test}`,
-                { responseType: 'blob' } 
+                { responseType: 'blob' }
             );
 
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -119,7 +102,7 @@ function StudentTestDetail({ studentData, onClose }) {
                 const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
                 if (filenameMatch.length === 2) filename = filenameMatch[1];
             }
-            
+
             link.setAttribute('download', filename);
             document.body.appendChild(link);
             link.click();
@@ -164,21 +147,23 @@ function StudentTestDetail({ studentData, onClose }) {
                             </ListGroup>
 
                             <hr />
-                            <h5>Métricas Detalladas</h5>
-                            {loadingMetrics && <div className="text-center my-3"><Spinner animation="border" /> <p>Cargando métricas...</p></div>}
-                            {errorMetrics && <Alert variant="danger">{errorMetrics}</Alert>}
-                            {testMetrics && Object.keys(testMetrics).length > 0 && !loadingMetrics && (
+                            <h5>Métricas Detalladas de Desempeño</h5>
+                            {studentData.id_test_metric ? (
                                 <Table striped bordered hover responsive size="sm" className="metrics-table">
                                     <tbody>
-                                        <tr><td><BsGraphUp className="me-2 text-info" />Tiempo Prom. Reacción (Aciertos):</td><td>{testMetrics.reaction_time_avg ? `${parseFloat(testMetrics.reaction_time_avg).toFixed(0)} ms` : 'N/A'}</td></tr>
-                                        <tr><td><BsCheckCircle className="text-success me-2" />Aciertos (Obst. Destruidos):</td><td>{testMetrics.correct_decisions_count ?? 'N/A'}</td></tr>
-                                        <tr><td><BsXCircle className="text-danger me-2" />Errores (Colisiones):</td><td>{testMetrics.error_count ?? 'N/A'}</td></tr>
-                                        <tr><td><BsLightningCharge className="text-warning me-2" />Disparos Fallidos:</td><td>{testMetrics.missed_shots_count ?? 'N/A'}</td></tr>
-                                        <tr><td><BsClockHistory className="me-2" />Duración Total del Juego:</td><td>{testMetrics.total_time ? `${parseFloat(testMetrics.total_time).toFixed(1)} seg` : 'N/A'}</td></tr>
+                                        <tr><td><BsMouse2 className="me-2 text-primary" />Tiempo Prom. Reacción:</td><td>{studentData.reaction_time_avg ? `${parseFloat(studentData.reaction_time_avg).toFixed(0)} ms` : 'N/A'}</td></tr>
+                                        <tr><td><BsCheckCircle className="me-2 text-success" />Aciertos:</td><td>{studentData.correct_hits ?? 'N/A'}</td></tr>
+                                        <tr><td className="metric-category-title" colSpan="2"><strong>Indicadores de Inatención</strong></td></tr>
+                                        <tr><td><BsEyeglasses className="me-2 text-warning" />Errores de Omisión:</td><td>{studentData.omission_errors ?? 'N/A'}</td></tr>
+                                        <tr><td><BsXCircle className="me-2 text-danger" />Colisiones:</td><td>{studentData.collision_errors ?? 'N/A'}</td></tr>
+                                        <tr><td className="metric-category-title" colSpan="2"><strong>Indicadores de Impulsividad</strong></td></tr>
+                                        <tr><td><BsHandIndexThumb className="me-2 text-warning" />Errores de Comisión:</td><td>{studentData.commission_errors ?? 'N/A'}</td></tr>
+                                        <tr><td><BsLightningCharge className="me-2 text-info" />Disparos Fallidos:</td><td>{studentData.missed_shots ?? 'N/A'}</td></tr>
                                     </tbody>
                                 </Table>
+                            ) : (
+                                <Alert variant="info">No hay métricas detalladas disponibles para este test.</Alert>
                             )}
-                            {(!testMetrics || Object.keys(testMetrics).length === 0) && !loadingMetrics && !errorMetrics && <p className="text-muted">No hay métricas detalladas disponibles para este test.</p>}
                         </Tab>
 
                         <Tab eventKey="answers" title={<><BsQuestionCircle className="me-1" /> Cuestionario</>}>
@@ -201,7 +186,7 @@ function StudentTestDetail({ studentData, onClose }) {
                                 )}
                             </div>
                         </Tab>
-                        
+
                         <Tab eventKey="support" title={<><BsCollectionPlay className="me-1" /> Material de Apoyo</>}>
                             <Alert variant="warning" className="mt-3 mb-4 text-center disclaimer-alert">
                                 <BsExclamationTriangleFill size={24} className="me-2" />
@@ -237,10 +222,10 @@ function StudentTestDetail({ studentData, onClose }) {
                     </Tabs>
                 </Card.Body>
                 <Card.Footer>
-                <Button variant="light" onClick={handleDownloadReport} disabled={isDownloading}>
+                    <Button variant="light" onClick={handleDownloadReport} disabled={isDownloading}>
                         <BsDownload className="me-2" />
                         {isDownloading ? 'Descargando...' : 'Descargar resultados de la prueba'}
-                </Button>
+                    </Button>
                 </Card.Footer>
             </Card>
         </div>

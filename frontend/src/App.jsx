@@ -11,8 +11,6 @@ import ResetPasswordPage from './views/ResetPasswordPage/ResetPasswordPage.jsx';
 
 import RoleProtectedRoute from './components/RoleProtectedRoute/RoleProtectedRoute';
 
-import './App.css';
-
 function App() {
     return (
         <> 
