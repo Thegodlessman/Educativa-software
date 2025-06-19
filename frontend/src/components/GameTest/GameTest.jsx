@@ -11,6 +11,7 @@ import energyBoltImg from '../../assets/game/energy_bolt.png';
 import friendlyShipImg from '../../assets/game/friendly_ship.png';
 import spaceBackgroundImg from '../../assets/game/space_background_scrolling.png';
 
+
 import shootSfx from '../../assets/game/sfx/shoot.mp3';
 import explosionSfx from '../../assets/game/sfx/explosion.mp3';
 import errorSfx from '../../assets/game/sfx/error.mp3';
@@ -102,6 +103,7 @@ function GameTest({ id_test_actual, userId, onGameEnd, id_room }) {
         obstacleMoveSpeed: 5,
         reactionZoneStartYRatio: 0.75,
         questionInterval: 240000,
+        INVINCIBILITY_DURATION: 2000,
     });
 
     const currentLaneIndex = useRef(1);
@@ -365,6 +367,18 @@ function GameTest({ id_test_actual, userId, onGameEnd, id_room }) {
             nextQuestionIndexRef.current = (nextQuestionIndexRef.current + 1) % questions.length;
         }
 
+        if (player.current.isInvincible) {
+            player.current.invincibilityTimer += deltaMs;
+            player.current.visible = Math.floor(player.current.invincibilityTimer / 150) % 2 === 0;
+
+            // Comprobamos si el tiempo de invulnerabilidad ha terminado
+            if (player.current.invincibilityTimer >= gameConstants.current.INVINCIBILITY_DURATION) {
+                player.current.isInvincible = false;
+                player.current.invincibilityTimer = 0;
+                player.current.visible = true; // Nos aseguramos de que el jugador sea visible al final
+            }
+        }
+
         const activeBullets = [];
         bullets.current.forEach(bullet => {
             bullet.graphic.y -= gc.bulletSpeedY * actualDelta;
@@ -420,10 +434,15 @@ function GameTest({ id_test_actual, userId, onGameEnd, id_room }) {
                 obstacle.enteredReactionZoneTime = Date.now();
             }
 
-            if (!obstacle.isCollision && obstacle.type === 'target' && checkCollision(player.current, obstacle.graphic)) {
+            if (!obstacle.isCollision && obstacle.type === 'target' && !player.current.isInvincible && checkCollision(player.current, obstacle.graphic)) {
                 playSound('playerHit');
                 metrics.current.collision_errors++;
                 obstacle.isCollision = true;
+
+                // Activamos la invulnerabilidad en el jugador
+                player.current.isInvincible = true;
+                player.current.invincibilityTimer = 0;
+
                 if (obstacle.enteredReactionZoneTime) {
                     metrics.current.reactionTimes.push({ obstacleId: obstacle.id, time: Date.now() - obstacle.enteredReactionZoneTime, type: 'collision' });
                 }
@@ -606,6 +625,9 @@ function GameTest({ id_test_actual, userId, onGameEnd, id_room }) {
             playerSprite.anchor.set(0.5, 0.8);
             playerSprite.width = gc.playerWidth;
             playerSprite.height = gc.playerHeight;
+            playerSprite.isInvincible = false;
+            playerSprite.invincibilityTimer = 0;
+
             playerGroundY.current = screenHeight - playerSprite.height / 2 - 20;
             lanePositions.current = [
                 getAbsoluteX(-0.75, playerGroundY.current, screenWidth, screenHeight),
