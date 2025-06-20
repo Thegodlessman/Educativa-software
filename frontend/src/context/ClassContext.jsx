@@ -1,14 +1,27 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import jwt_decode from 'jwt-decode';
 
 export const ClassContext = createContext();
+
+export const useClass = () => {
+    const context = useContext(ClassContext);
+    if (!context) {
+        throw new Error('useClass debe ser usado dentro de un ClassProvider');
+    }
+    return context;
+};
 
 export const ClassProvider = ({ children }) => {
     const [classes, setClasses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [token, setToken] = useState(localStorage.getItem('token') || null);
     const [userData, setUserData] = useState(null);
+    const [selectedRoom, setSelectedRoom] = useState(null);
+
+    const selectClass = (room) => {
+        setSelectedRoom(room);
+    };
 
     const fetchClasses = async () => {
         try {
@@ -55,6 +68,14 @@ export const ClassProvider = ({ children }) => {
         setClasses((prev) => [...prev, newClass]);
     };
 
+    const logout = () => {
+        localStorage.removeItem('token');
+        setToken(null);
+        setUserData(null);
+        setClasses([]);
+        setSelectedRoom(null);
+    }
+
     useEffect(() => {
         fetchClasses();
     }, [token]);
@@ -73,8 +94,21 @@ export const ClassProvider = ({ children }) => {
         };
     }, []);
 
+    const contextValue = {
+        userData,
+        classes,
+        setClasses,
+        loading,
+        fetchClasses,
+        addClass,
+        setToken,
+        selectedRoom,
+        selectClass,
+        logout
+    };
+
     return (
-        <ClassContext.Provider value={{ userData, classes, setClasses, loading, fetchClasses, addClass, setToken }}>
+        <ClassContext.Provider value={contextValue}>
             {children}
         </ClassContext.Provider>
     );

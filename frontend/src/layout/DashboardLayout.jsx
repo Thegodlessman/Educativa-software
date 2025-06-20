@@ -4,15 +4,12 @@ import Sidebar from "../components/Sidebar/Sidebar";
 
 import "./DashboardLayout.css";
 
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = ({ children, setActiveView, activeView }) => {
     return (
         <>
             <NavBar />
             <div className="dashboard-container d-flex">
-                <div className="sidebar">
-                    <Sidebar />
-                </div>
-
+                <Sidebar setActiveView={setActiveView} activeView={activeView} />
                 <div className="main-content">{children}</div>
             </div>
         </>
