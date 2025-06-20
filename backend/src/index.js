@@ -48,8 +48,55 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
     console.log(`¡Usuario conectado a través de WebSocket! ID: ${socket.id}`);
 
-    socket.on('game_test_connected', (data) => {
-        console.log(`Backend: Recibido evento 'game_test_connected' de cliente ${socket.id}. Datos:`, data);
+    socket.on('gameTestReady', async ({ userId, id_room }) => {
+        console.log(`Backend: Recibido 'gameTestReady' del usuario: ${userId} para la sala: ${id_room}`);
+        const testVersion = 'v1.0'; // Definimos la versión de la prueba
+
+        if (!userId || !id_room) {
+            return socket.emit('gameTestError', { message: 'Datos incompletos (userId o id_room).' });
+        }
+
+        try {
+            // 1. Validar usuario y obtener id_user_room (lógica de tu controlador)
+            const userRoomQuery = await pool.query(
+                `SELECT ur.id_user_room FROM user_room ur JOIN users u ON ur.id_user = u.id_user JOIN roles r ON u.active_role = r.id_rol WHERE ur.id_user = $1 AND ur.id_room = $2 AND r.rol_name = 'Estudiante'`,
+                [userId, id_room]
+            );
+
+            if (userRoomQuery.rows.length === 0) {
+                return socket.emit('gameTestError', { message: 'El usuario no es un estudiante válido en esta sala.' });
+            }
+            const id_user_room = userRoomQuery.rows[0].id_user_room;
+
+            // 2. Validar que no exista una prueba previa para esta versión
+            const existingTestCheck = await pool.query(
+                `SELECT id_test FROM tests WHERE id_user_room = $1 AND test_version = $2`,
+                [id_user_room, testVersion]
+            );
+
+            if (existingTestCheck.rows.length > 0) {
+                // Si la prueba ya existe, la reutilizamos para el juego.
+                const id_test = existingTestCheck.rows[0].id_test;
+                console.log(`Backend: El estudiante ya había iniciado la prueba. Reutilizando ID de prueba: ${id_test}.`);
+                return socket.emit('testStart', { id_test });
+            }
+            
+            // 3. Si no existe, creamos la nueva prueba
+            const insertQuery = `
+                INSERT INTO tests (id_user_room, test_date, test_version) 
+                VALUES ($1, NOW(), $2)
+                RETURNING id_test; 
+            `;
+            const result = await pool.query(insertQuery, [id_user_room, testVersion]);
+            const newTestId = result.rows[0].id_test;
+
+            console.log(`Backend: Nueva prueba creada con ID: ${newTestId}. Enviando 'testStart' al cliente.`);
+            socket.emit('testStart', { id_test: newTestId });
+
+        } catch (error) {
+            console.error(`Error al procesar 'gameTestReady' para user ${userId}:`, error);
+            socket.emit('gameTestError', { message: 'Error del servidor al iniciar la prueba.' });
+        }
     });
 
     socket.on('submitGameTestResults', async (receivedMetrics) => {
