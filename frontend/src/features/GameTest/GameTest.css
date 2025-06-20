@@ -1,0 +1,317 @@
+.game-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 80vh;
+    background-color: #f0f2f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.game-screen {
+    background-color: rgba(12, 28, 68, 0.9);
+    color: white;
+    border-radius: 15px;
+    text-align: center;
+    max-width: 600px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.game-screen h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #61dafb;
+}
+
+.game-screen p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.game-screen button {
+    background-color: #61dafb;
+    color: #0C1C44;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.game-screen button:hover {
+    transform: scale(1.05);
+    background-color: #88eaff;
+}
+
+.game-ui-overlay {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: 'Segoe UI', sans-serif;
+    z-index: 10;
+    pointer-events: all;
+}
+
+.game-stats-main,
+.game-stats-debug {
+    display: flex;
+    gap: 20px;
+}
+
+.game-stats-main span strong,
+.game-stats-debug span strong {
+    color: #61dafb; 
+    font-weight: bold;
+}
+
+.question-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    animation: fadeIn 0.3s;
+}
+
+.question-modal-content {
+    background: white;
+    color: #333;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.question-modal-content h3 {
+    margin-top: 0;
+    font-size: 1.5rem;
+}
+
+.question-modal-options button {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    font-size: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.question-modal-options button:hover,
+.question-modal-options button.selected {
+    background-color: #e0f7ff;
+    border-color: #61dafb;
+}
+
+.question-modal-submit {
+    margin-top: 20px;
+    padding: 12px 25px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.question-modal-submit:disabled {.game-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 80vh;
+    background-color: #f0f2f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.game-screen {
+    background-color: rgba(12, 28, 68, 0.9);
+    color: white;
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    max-width: 600px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.game-screen h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #61dafb;
+}
+
+.game-screen p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.game-screen button {
+    background-color: #61dafb;
+    color: #0C1C44;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.game-screen button:hover {
+    transform: scale(1.05);
+    background-color: #88eaff;
+}
+
+.game-ui-overlay {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 40px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px 25px;
+    border-radius: 10px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    z-index: 10;
+}
+
+.question-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    animation: fadeIn 0.3s;
+}
+
+.question-modal-content {
+    background: white;
+    color: #333;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.question-modal-content h3 {
+    margin-top: 0;
+    font-size: 1.5rem;
+}
+
+.question-modal-options button {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    font-size: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.question-modal-options button:hover,
+.question-modal-options button.selected {
+    background-color: #e0f7ff;
+    border-color: #61dafb;
+}
+
+.question-modal-submit {
+    margin-top: 20px;
+    padding: 12px 25px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.question-modal-submit:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.game-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.game-modal-content {
+    background: none;
+    padding: 0;
+    width: auto;
+    height: auto;
+}
+
+.debug-end-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.debug-end-button:hover {
+    background-color: #c82333;
+}

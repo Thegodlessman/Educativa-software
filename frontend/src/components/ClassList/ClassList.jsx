@@ -4,7 +4,7 @@ import { Card, Spinner, Button, Alert, Tabs, Tab } from "react-bootstrap";
 import { BsArrowLeft, BsClipboard, BsGraphUp, BsPersonCircle, BsCalendarEvent, BsTrophy, BsShieldExclamation } from "react-icons/bs";
 import './ClassList.css';
 import { notifyError, notifySuccess, notifyWarning, notifyInfo } from '../../utils/notify.js'
-import GameTest from '../GameTest/GameTest';
+import GameTest from '../../features/GameTest/GameTest/GameTest.jsx';
 import StudentTestDetail from '../StudentTestDetail/StudentTestDetail.jsx';
 import axios from 'axios';;
 import RiskDistributionChart from '../RiskDistributionChar/RiskDistributionChart.jsx';
