@@ -5,13 +5,18 @@ import { useClass } from "../../context/ClassContext";
 import CreateRoom from '../CreateRoom/CreateRoom';
 import JoinRoom from '../JoinRoom/JoinRoom';
 import { Spinner } from 'react-bootstrap';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 function Sidebar({ setActiveView, activeView }) {
     const { classes, userData, selectClass, selectedRoom, loading, logout } = useClass(); 
-    
+    const navigate = useNavigate();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showJoinModal, setShowJoinModal] = useState(false);
 
+    const handleLogout = async (event) => {
+      logout()
+      navigate('/login')
+    }
     if (loading || !userData) {
         return (
             <div className="sidebar sidebar-loading">
@@ -75,7 +80,7 @@ function Sidebar({ setActiveView, activeView }) {
             <BsPersonFillGear className="icon" />
             <span>Ajustes</span>
           </div>
-          <div className="nav-item" onClick={logout}>
+          <div className="nav-item" onClick={handleLogout}>
             <BsBoxArrowLeft className="icon" />
             <span>Cerrar sesión</span>
           </div>

@@ -10,7 +10,8 @@ import {
     updateActiveRole,
     getRoles,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    createStudent
 } from '../controllers/user.controller.js'
 
 import { 
@@ -19,7 +20,8 @@ import {
     validateUpdatePassword, 
     validateUpdateUser,
     validateForgotPassword,
-    validateResetPassword
+    validateResetPassword,
+    validateCreateStudent
 } from "../middleware/validator.js";
 
 import capitalizeNames from "../middleware/format.js";
@@ -54,5 +56,7 @@ router.get('/profile/roles', getRoles)
 router.post('/forgot-password', validateForgotPassword, forgotPassword);
 
 router.post('/reset-password/:token', validateResetPassword, resetPassword)
+
+router.post('/users/:id_room/register-student', validateCreateStudent, createStudent)
 
 export default router; 

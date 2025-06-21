@@ -3,6 +3,11 @@
     max-width: 450px; 
 }
 
+.register-student-container{
+    display: flex;
+    flex-direction: column;
+}
+
 .register-title {
     font-size: 2.25rem;
     color: #374151;

@@ -1,13 +1,14 @@
 import { useContext, useState, useEffect } from "react";
 import { useClass } from "../../context/ClassContext";
 import { Card, Spinner, Button, Alert, Tabs, Tab } from "react-bootstrap";
-import { BsArrowLeft, BsClipboard, BsGraphUp, BsPersonCircle, BsGridFill, BsCalendarEvent, BsTrophy, BsShieldExclamation } from "react-icons/bs";
+import { BsArrowLeft, BsClipboard, BsGraphUp, BsPersonCircle, BsGridFill, BsCalendarEvent, BsTrophy, BsListUl, BsShieldExclamation } from "react-icons/bs";
 import './ClassList.css';
 import { notifyError, notifySuccess, notifyWarning, notifyInfo } from '../../utils/notify.js'
 import GameTest from '../../features/GameTest/GameTest/GameTest.jsx';
 import StudentTestDetail from '../StudentTestDetail/StudentTestDetail.jsx';
 import axios from 'axios';;
 import RiskDistributionChart from '../RiskDistributionChar/RiskDistributionChart.jsx';
+import RegisterStundentForm from "../RegisterStudentForm/RegisterStudentForm.jsx"; 
 
 function ClassList() {
   const { classes, loading, userData, selectedRoom, selectClass } = useClass();
@@ -124,8 +125,8 @@ function ClassList() {
         if (error.response.status === 409) {
           notifyWarning(errorMessage);
           const currentSelectedRoom = selectedRoom;
-          setSelectedRoom(null);
-          setTimeout(() => setSelectedRoom(currentSelectedRoom), 0);
+          currentSelectedRoom(null);
+          setTimeout(() => currentSelectedRoom(currentSelectedRoom), 0);
         } else {
           notifyError(`No se pudo iniciar la prueba: ${errorMessage}`);
         }
@@ -142,8 +143,8 @@ function ClassList() {
     setIsGameActive(false);
     setGameProps(null);
     const currentSelectedRoom = selectedRoom;
-    setSelectedRoom(null);
-    setTimeout(() => setSelectedRoom(currentSelectedRoom), 0);
+    currentSelectedRoom(null);
+    setTimeout(() => currentSelectedRoom(currentSelectedRoom), 0);
   };
 
   const handleShowStudentDetail = (student) => {
@@ -158,8 +159,8 @@ function ClassList() {
     setSelectedStudentForDetail(null);
     if (selectedRoom && userData?.rol_name === "Profesor") {
       const currentSelectedRoom = selectedRoom;
-      setSelectedRoom(null);
-      setTimeout(() => setSelectedRoom(currentSelectedRoom), 0);
+      currentSelectedRoom(null);
+      setTimeout(() => currentSelectedRoom(currentSelectedRoom), 0);
     }
   };
 
@@ -260,6 +261,12 @@ function ClassList() {
                     </div>)}
                 </Tab>
                 <Tab
+                  eventKey="register-stundent"
+                  title={<><BsListUl className="me-2" />Registro Rapido de Estudiantes</>}
+                >
+                  <RegisterStundentForm id_room={selectedRoom.id_room}></RegisterStundentForm>
+                </Tab>
+                <Tab
                   eventKey="class-stats"
                   title={<><BsGraphUp className="me-2" />Estadísticas de la clase</>}
                 >
@@ -284,8 +291,8 @@ function ClassList() {
                   <p>Error: {studentTestStatus.error}</p>
                   <Button variant="outline-danger" onClick={() => {
                     const currentSelectedRoom = selectedRoom;
-                    setSelectedRoom(null);
-                    setTimeout(() => setSelectedRoom(currentSelectedRoom), 0);
+                    currentSelectedRoom(null);
+                    setTimeout(() => currentSelectedRoom(currentSelectedRoom), 0);
                   }}>Reintentar</Button>
                 </div>
               ) : studentTestStatus?.isCompleted ? (

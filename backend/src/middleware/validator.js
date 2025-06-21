@@ -41,6 +41,19 @@ export const validateCreateUser = [
     handleValidationErrors
 ];
 
+export const validateCreateStudent = [
+    check('user_ced', 'La cédula es obligatoria y debe ser numérica.')
+        .notEmpty()
+        .isNumeric(),
+    check('user_name', 'El nombre es obligatorio.')
+        .notEmpty(),
+    check('user_lastname', 'El apellido es obligatorio.')
+        .notEmpty(),
+    check('user_email', 'Debe proveer un correo electrónico válido.')
+        .isEmail(),
+    handleValidationErrors
+]
+
 // Validador para la actualización de datos de un usuario
 export const validateUpdateUser = [
     check('ced_user', 'La cédula es obligatoria y debe ser numérica.')
