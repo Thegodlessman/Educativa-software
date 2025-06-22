@@ -39,23 +39,6 @@ export const getUsersById = async (req, res) => { //* Obtener usuario por ID
 export const loginUser = async (req, res) => { //* Iniciar Sesión
     const { user_email, user_password } = req.body;
 
-    // Validaciones de entrada
-    await check('user_email')
-        .notEmpty().withMessage('El email es obligatorio')
-        .isEmail().withMessage('El email no es válido')
-        .run(req);
-    await check('user_password')
-        .notEmpty().withMessage('La contraseña es obligatoria')
-        .run(req);
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({
-            message: "Errores de validación",
-            errors: errors.array()
-        });
-    }
-
     try {
         // Buscar al usuario por email
         const { rows } = await pool.query(
@@ -152,11 +135,66 @@ export const createUser = async (req, res) => { //* Crear Usuario
         return res.status(200).json({ message: 'Usuario creado exitosamente', user: newUser });
 
     } catch (error) {
-        // Un bloque try-catch general es bueno para capturar errores inesperados
         console.error("Error creando usuario:", error);
         return res.status(500).json({ message: "Error del servidor" });
     }
 };
+
+export const createStudent = async (req, res) => {
+    try {
+        const {user_ced, user_name, user_lastname, user_email} = req.body
+        const { id_room } = req.params
+
+        const user_url = `${process.env.CLOUDNARY_URL_IMG}educativa/Educativa-Profile`;
+
+        const queryRole = `SELECT id_rol FROM "roles" WHERE rol_name = 'Estudiante'`;
+        const { rows: roleRows } = await pool.query(queryRole);
+        const id_rol = roleRows[0].id_rol;
+
+        const query1 = 'SELECT * FROM "users" WHERE user_email = $1 ';
+        const { rowCount: emailCount } = await pool.query(query1, [user_email]);
+        if (emailCount > 0) {
+            return res.status(400).json({ message: "El email ya ha sido registrado" });
+        }
+
+        const query2 = 'SELECT * FROM "users" WHERE user_ced = $1';
+        const { rowCount: userCount } = await pool.query(query2, [user_ced]);
+        if (userCount > 0) {
+            return res.status(400).json({ message: "La cédula ya ha sido registrada" });
+        }
+        
+        const temporalPassword = randomBytes(16).toString('hex');
+
+        const { rows, rowCount } = await pool.query(
+            `INSERT INTO "users" (id_user, user_url, user_ced, user_name, user_lastname, user_email, user_password, active_role)
+            VALUES (default, $1, $2, $3, $4, $5, $6, $7) 
+            RETURNING *`,
+            [user_url, user_ced, user_name, user_lastname, user_email, temporalPassword, id_rol]
+        );
+
+        if (rowCount === 0) {
+            return res.status(404).json({ message: 'Hubo un error al crear el usuario' });
+        }
+
+        const newUser = rows[0];
+
+        await pool.query(
+            'INSERT INTO "roles_users" (id_user, id_rol) VALUES ($1, $2)',
+            [newUser.id_user, id_rol]
+        );
+
+        await pool.query(
+            'INSERT INTO user_room (id_user, id_room) VALUES ($1, $2)',
+            [newUser.id_user, id_room]
+        );
+
+        return res.status(200).json({ message: 'Usuario creado y unido exitosamente', user: newUser });
+
+    } catch (error) {
+        console.error("Error registrando el usuario:", error)
+        return res.status(500).json({ message: "Error del servidor" });
+    }
+}
 
 export const deleteUser = async (req, res) => { //* Borrar usuario
     const { id } = req.params;
@@ -379,5 +417,46 @@ export const resetPassword = async (req, res) => {
     } catch (error) {
         console.error("Error en la función resetPassword:", error);
         res.status(500).json({ message: "Error interno del servidor." });
+    }
+};
+
+export const fastLogin = async (req, res) => {
+    const { id_user } = req.body;
+
+    if (!id_user) {
+        return res.status(400).json({ message: 'Se requiere el ID del usuario.' });
+    }
+
+    try {
+        const result = await pool.query(`
+            SELECT 
+                u.id_user,
+                CONCAT(u.user_name,' ',u.user_lastname) AS full_name,
+                u.user_url,
+                u.user_ced,
+                u.user_email,
+                u.user_password,
+                u.active_role, 
+                r.rol_name 
+            FROM users u
+            JOIN roles r ON u.active_role = r.id_rol
+            WHERE u.id_user = $1;
+        `, [id_user]);
+
+        const userRows = result.rows; 
+
+        if (userRows.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado.' });
+        }
+
+        const user = userRows[0];
+        
+        const tokenSession = await tokenSign(user);
+
+        res.status(200).json({ tokenSession });
+
+    } catch (error) {
+        console.error("Error en fastLogin:", error);
+        return res.status(500).json({ message: 'Error interno del servidor.' });
     }
 };

@@ -1,4 +1,3 @@
-import { response } from "express";
 import { pool } from "../db.js";
 import { generateRoomCode } from "../helpers/generateCode.js";
 
@@ -155,5 +154,39 @@ export const getJoinedClass = async (req, res) => {
     return res.status(200).json({ classes: rows })
   } catch (error) {
     return res.status(500).json({ message: 'Error al obtener las clases' })
+  }
+}
+
+export const getStudentsByClassCode = async (req, res) => {
+  const { roomCode } = req.params;
+
+  console.log(roomCode);
+
+  if (!roomCode) {
+      return res.status(400).json({ message: 'El código de la clase es requerido.' });
+  }
+
+  try {
+      const result = await pool.query(`
+          SELECT u.id_user, u.user_name, u.user_lastname, u.user_url
+          FROM users u
+          JOIN user_room ur ON u.id_user = ur.id_user
+          JOIN room r ON ur.id_room = r.id_room
+          WHERE r.code_room = $1
+          AND u.active_role = (SELECT id_rol FROM roles WHERE rol_name = 'Estudiante')
+          ORDER BY u.user_lastname;
+      `, [roomCode]);
+
+      const rows = result.rows;
+
+      if (rows.length === 0) {
+          return res.status(404).json({ message: 'No se encontraron estudiantes para este código o el código es inválido.' });
+      }
+
+      res.json(rows);
+
+  } catch (error) {
+      console.error("Error en getStudentsByClassCode:", error);
+      return res.status(500).json({ message: 'Error interno del servidor.' });
   }
 }

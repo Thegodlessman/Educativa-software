@@ -102,9 +102,6 @@
   }
 }
 
-/* --- TUS OTROS ESTILOS --- */
-/* Mantén aquí los estilos que no están relacionados a la tabla, 
-   como .card-hover, .game-modal-overlay, etc. si los sigues usando en otra parte */
 .card-hover {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }

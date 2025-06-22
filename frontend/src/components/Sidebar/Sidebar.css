@@ -1,139 +1,142 @@
-/* Ajusta los colores, tamaños y tipografías a tu gusto o según tu mockup */
-
 .sidebar {
-  width: 240px; /* Ancho del sidebar */
+  width: 250px;
   height: 100vh;
-  background-color: #fff; /* Fondo blanco */
+  background-color: #ffffff;
+  border-right: 1px solid #e9ecef;
   display: flex;
-  flex-direction: column; /* Apilar secciones de arriba a abajo */
-  justify-content: space-between;
-  border-right: 1px solid #eee; /* Línea divisoria a la derecha */
+  flex-direction: column;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.sidebar-brand {
+  padding: 1rem 0.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: var(--primary-color); /* Un color azul principal */
+}
+
+.sidebar-nav {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
-/* Sección superior */
-.sidebar-top {
-  padding: 20px;
+/* --- Estilos de Navegación y Elementos de Menú --- */
+.nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-/* Sección de clases */
-.sidebar-middle {
-  padding: 1rem;
-  flex-grow: 1;
-  overflow-y: auto;
-  max-height: 100%;
-}
-
-/* Scrollbar estilizado */
-.sidebar-middle::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar-middle::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.1);
-  border-radius: 6px;
-}
-
-/* Sección inferior */
-.sidebar-bottom {
-  padding: 20px;
-  border-top: 1px solid #eee; /* Línea divisoria para separar la parte inferior */
-}
-
-/* Elementos de menú (Inicio, Ajustes, Cerrar sesión, etc.) */
-.menu-item {
+.nav-item {
   display: flex;
   align-items: center;
-  padding: 8px 0;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
   cursor: pointer;
-  color: #000; /* Color de texto */
-  font-weight: 500; /* Ajusta el grosor según tu diseño */
+  color: #495057; /* Texto gris oscuro */
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.menu-item .icon {
-  margin-right: 10px;
-  font-size: 1.1rem; /* Tamaño del ícono */
+.nav-item .icon {
+  margin-right: 1rem;
+  font-size: 1.1rem;
 }
 
-/* Botón para crear nueva clase */
-.btn-create-class {
-  display: inline-block;
-  margin-top: 20px;
-  background-color: #198754; /* Ajusta el color según tu mockup (verde, etc.) */
-  color: #fff;
+.nav-item:hover {
+  background-color: #f8f9fa; /* Un gris muy claro al pasar el ratón */
+}
+
+/* --- ESTILO PARA EL ELEMENTO ACTIVO --- */
+.nav-item.active {
+  background-color: #e9ecef;
+  color: var(--primary-color); 
+  font-weight: 600;
+}
+
+/* --- Acciones rápidas (Botones) --- */
+.quick-actions {
+  padding: 1rem;
+}
+
+.btn-action {
+  width: 100%;
+  background-color: var(--secondary-color);
+  color: white;
   border: none;
   padding: 10px 16px;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
   font-weight: 600;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.btn-hover {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.btn-action:hover {
+  background-color: var(--secondary-color_gradient);
+  transform: translateY(-2px);
 }
 
-.btn-hover:hover {
-  transform: scale(1.01);
-  box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.15);
-  cursor: pointer;
-}
-
-/* Título de sección (CLASES) */
+/* --- Lista de Clases --- */
 .section-title {
-  font-size: 0.85rem;
-  font-weight: bold;
-  color: #888;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #adb5bd; /* Texto gris claro */
+  padding: 0 1rem;
+  margin-top: 1.5rem;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* Contenedor de clase */
+.class-list-scrollable {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 0 0.5rem;
+}
+.class-list-scrollable::-webkit-scrollbar { width: 5px; }
+.class-list-scrollable::-webkit-scrollbar-thumb { background-color: #dee2e6; border-radius: 5px; }
+
 .class-item {
-  background-color: #f5f5f5;
-  border-radius: 12px;
-  padding: 0.6rem 0.9rem;
-  margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: background-color 0.2s ease;
 }
+.class-item .icon { margin-right: 0.8rem; }
+.class-item span { font-size: 0.9rem; font-weight: 500; }
+.class-item:hover { background-color: #f9f8fa; }
 
-.class-item:hover {
-  background-color: #e0e0e0;
-  transform: scale(1.02);
-}
-
-/* Icono */
-.class-item .icon {
-  color: var(--primary-color); /* azul educativo */
-  font-size: 1rem;
-}
-
-/* Texto de clase */
-.class-item span {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #333;
-}
-
-/* Badge 'NEW' */
-.badge-new {
-  margin-left: auto; /* Empuja el badge al extremo derecho */
-  background-color: #e8ddff; /* Color de fondo lila suave */
-  color: #7e3bdc; /* Texto lila */
-  border-radius: 12px;
-  padding: 2px 8px;
-  font-size: 12px;
+/* --- ESTILO PARA LA CLASE ACTIVA --- */
+.class-item.active {
+  background-color: #f5e0ff; /* Un azul muy claro */
   font-weight: 600;
+  color: var(--primary-color);
 }
 
-/* Mensaje si no hay clases */
-.no-classes {
+.no-classes-message {
   font-size: 0.85rem;
-  color: #999;
-  margin-top: 0.5rem;
+  color: #6c757d;
+  padding: 0 1rem;
+}
+
+/* --- Pie de Sidebar --- */
+.sidebar-footer {
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.sidebar-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--primary-color);
 }

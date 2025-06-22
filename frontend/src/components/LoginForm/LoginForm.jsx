@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { Form, Button, Alert, InputGroup } from 'react-bootstrap';
+import { Form, Button, InputGroup } from 'react-bootstrap';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ClassContext } from "../../context/ClassContext";
@@ -56,7 +56,7 @@ function LoginForm() {
             setPressButton(false);
         }
     };
-    
+
     const redirectHome = () => {
         navigate("/");
     };
@@ -69,7 +69,7 @@ function LoginForm() {
             </div>
 
             <h2 className="mb-4 fw-bold text-center">Acceso de Usuario</h2>
-            
+
             <Form onSubmit={handleSubmit} noValidate>
 
                 <InputGroup className="mb-3">
@@ -128,6 +128,9 @@ function LoginForm() {
 
                 <div className="text-center mt-4 small">
                     ¿No tienes cuenta? <a className="fw-bold" href="/register">Regístrate aquí</a>
+                </div>
+                <div className="text-center small">
+                    <p>¿Eres un estudiante? <a href="/fast-access" className="fw-bold">Entra con el código de tu clase</a></p> 
                 </div>
             </Form>
         </div>
