@@ -11,7 +11,8 @@ import {
     getRoles,
     forgotPassword,
     resetPassword,
-    createStudent
+    createStudent,
+    fastLogin,
 } from '../controllers/user.controller.js'
 
 import { 
@@ -58,5 +59,7 @@ router.post('/forgot-password', validateForgotPassword, forgotPassword);
 router.post('/reset-password/:token', validateResetPassword, resetPassword)
 
 router.post('/users/:id_room/register-student', validateCreateStudent, createStudent)
+
+router.post('/fast-login', fastLogin);
 
 export default router; 

@@ -1,27 +1,47 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import jwt_decode from 'jwt-decode';
+import { Navigate, useLocation, Outlet } from 'react-router-dom';
+import { useClass } from '../../context/ClassContext'; 
+import { Spinner } from 'react-bootstrap'; 
 
-const RoleProtectedRoute = ({ children, allowedRoles }) => {
-    const token = localStorage.getItem('token');
-    let userRole = null;
-
-    if (token) {
-        try {
-            const decodedToken = jwt_decode(token);
-            userRole = decodedToken.rol_name;
-        } catch (e) {
-            console.error('Error decoding token:', e);
-        }
-    }
-
+const RoleProtectedRoute = ({ allowedRoles }) => {
+    const { token, userData, loading, logout } = useClass(); 
     const location = useLocation();
 
-    return allowedRoles.includes(userRole) ? (
-        children
-    ) : (
-        <Navigate to="/login" state={{ from: location }} replace />
-    );
+    if (loading) {
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100vh',
+                width: '100vw',
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                zIndex: 9999
+            }}>
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Cargando autenticación...</span>
+                </Spinner>
+            </div>
+        );
+    }
+
+    if (!token) {
+        alert("no hay token")
+        return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+
+    if (!userData || !allowedRoles.includes(userData.rol_name)) {
+        console.warn(`Acceso denegado para el rol: ${userData ? userData.rol_name : 'No Definido'}. Roles permitidos: ${allowedRoles.join(', ')}`);
+        
+        logout(); 
+        
+        // Redirige a una página de "Acceso Denegado" o a la página de inicio
+        return <Navigate to="/" state={{ from: location }} replace />;
+    }
+    return <Outlet />;
 };
 
 export default RoleProtectedRoute;

@@ -39,23 +39,6 @@ export const getUsersById = async (req, res) => { //* Obtener usuario por ID
 export const loginUser = async (req, res) => { //* Iniciar Sesión
     const { user_email, user_password } = req.body;
 
-    // Validaciones de entrada
-    await check('user_email')
-        .notEmpty().withMessage('El email es obligatorio')
-        .isEmail().withMessage('El email no es válido')
-        .run(req);
-    await check('user_password')
-        .notEmpty().withMessage('La contraseña es obligatoria')
-        .run(req);
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({
-            message: "Errores de validación",
-            errors: errors.array()
-        });
-    }
-
     try {
         // Buscar al usuario por email
         const { rows } = await pool.query(
@@ -437,3 +420,43 @@ export const resetPassword = async (req, res) => {
     }
 };
 
+export const fastLogin = async (req, res) => {
+    const { id_user } = req.body;
+
+    if (!id_user) {
+        return res.status(400).json({ message: 'Se requiere el ID del usuario.' });
+    }
+
+    try {
+        const result = await pool.query(`
+            SELECT 
+                u.id_user,
+                CONCAT(u.user_name,' ',u.user_lastname) AS full_name,
+                u.user_url,
+                u.user_ced,
+                u.user_email,
+                u.user_password,
+                u.active_role, 
+                r.rol_name 
+            FROM users u
+            JOIN roles r ON u.active_role = r.id_rol
+            WHERE u.id_user = $1;
+        `, [id_user]);
+
+        const userRows = result.rows; 
+
+        if (userRows.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado.' });
+        }
+
+        const user = userRows[0];
+        
+        const tokenSession = await tokenSign(user);
+
+        res.status(200).json({ tokenSession });
+
+    } catch (error) {
+        console.error("Error en fastLogin:", error);
+        return res.status(500).json({ message: 'Error interno del servidor.' });
+    }
+};

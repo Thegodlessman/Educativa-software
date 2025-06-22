@@ -8,6 +8,7 @@ import RegisterPage from './views/RegisterPage/RegisterPage.jsx';
 import ProfilePage from './views/ProfilePage/ProfilePage.jsx';
 import ForgotPasswordPage from './views/ForgotPasswordPage/ForgotPasswordPage.jsx';
 import ResetPasswordPage from './views/ResetPasswordPage/ResetPasswordPage.jsx';
+import FastAccessPage from './views/FastAccessPage/FastAccessPage.jsx';
 
 import RoleProtectedRoute from './components/RoleProtectedRoute/RoleProtectedRoute';
 
@@ -33,15 +34,11 @@ function App() {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+                    <Route path="/fast-access" element={<FastAccessPage/>}/>
 
-                    <Route
-                        path="/profile"
-                        element={
-                            <RoleProtectedRoute allowedRoles={['usuario', 'Estudiante', 'Profesor', 'administrador', 'Desarrollador']}>
-                                <ProfilePage />
-                            </RoleProtectedRoute>
-                        }
-                    />
+                    <Route element={<RoleProtectedRoute allowedRoles={['usuario', 'Estudiante', 'Profesor', 'administrador', 'Desarrollador']} />}>
+                        <Route path="/profile" element={<ProfilePage />} />
+                    </Route>
                 </Routes>
             </Router>
         </>

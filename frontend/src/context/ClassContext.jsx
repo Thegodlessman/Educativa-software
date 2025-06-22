@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import jwt_decode from 'jwt-decode';
+import jwtDecode from 'jwt-decode'; 
 
 export const ClassContext = createContext();
 
@@ -19,46 +19,72 @@ export const ClassProvider = ({ children }) => {
     const [userData, setUserData] = useState(null);
     const [selectedRoom, setSelectedRoom] = useState(null);
 
+    const processTokenAndSetState = (newToken) => {
+        console.log("processTokenAndSetState llamado con:", newToken); 
+        if (newToken && typeof newToken === 'string' && newToken.trim() !== '') {
+            try {
+                localStorage.setItem('token', newToken); 
+                setToken(newToken); 
+
+                const decoded = jwtDecode(newToken); // Decodifica el token
+                const { id_user, rol_name } = decoded;
+                setUserData({ id_user, rol_name }); // Establece userData
+
+                axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+
+            } catch (error) {
+                console.error("Error decodificando el token en processTokenAndSetState:", error);
+                logout(); 
+            }
+        } else {
+            console.log("Token inválido o vacío pasado a processTokenAndSetState, limpiando sesión.");
+            logout();
+        }
+    };
+
     const selectClass = (room) => {
         setSelectedRoom(room);
     };
 
     const fetchClasses = async () => {
+        setLoading(true); 
         try {
-            if (!token) {
+            if (!token || !userData) {
+                console.log("No token o userData disponible para fetchClasses, saltando la carga.");
                 setClasses([]);
-                setLoading(false);
-                setUserData(null)
+                setUserData(null);n
                 return;
             }
 
-            const decoded = jwt_decode(token);
-            const {id_user, rol_name} = decoded
-            setUserData( {id_user, rol_name})
-            let endpoint = ""
+            const { id_user, rol_name } = userData;
+            let endpoint = "";
 
-            if(rol_name === "Profesor"){
-                endpoint = `${import.meta.env.VITE_BACKEND_URL}room/classes/created`
-            }else if(rol_name === "Estudiante"){
-                endpoint = `${import.meta.env.VITE_BACKEND_URL}room/classes/joined`
+            if (rol_name === "Profesor") {
+                endpoint = `${import.meta.env.VITE_BACKEND_URL}room/classes/created`;
+            } else if (rol_name === "Estudiante") {
+                endpoint = `${import.meta.env.VITE_BACKEND_URL}room/classes/joined`;
             } else {
+                console.warn("Rol no reconocido, no se pueden cargar las clases.");
                 setClasses([]);
-                setLoading(false);
-                setUserData(null)
+                setUserData(null);
                 return;
             }
 
             const response = await axios.post(
                 endpoint,
                 { id_user: id_user },
-                { headers: { Authorization: `Bearer ${token}` } }
+                { headers: { Authorization: `Bearer ${token}` } } // Usa el estado 'token'
             );
 
             setClasses(response.data.classes || []);
         } catch (error) {
             console.error("Error fetching classes:", error);
             setClasses([]);
-            setUserData(null)
+            setUserData(null);
+            if (axios.isAxiosError(error) && error.response && (error.response.status === 401 || error.response.status === 403)) {
+                console.warn("API respondió con error de autorización. Forzando logout.");
+                logout();
+            }
         } finally {
             setLoading(false);
         }
@@ -69,22 +95,29 @@ export const ClassProvider = ({ children }) => {
     };
 
     const logout = () => {
+        console.log("Ejecutando logout."); // Para depuración
         localStorage.removeItem('token');
-        setToken(null);
+        setToken(null); // Limpia el estado 'token'
         setUserData(null);
         setClasses([]);
         setSelectedRoom(null);
-    }
+        delete axios.defaults.headers.common['Authorization']; // Limpia el header de Axios
+    };
 
     useEffect(() => {
-        fetchClasses();
-    }, [token]);
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+            processTokenAndSetState(storedToken); 
+        } else {
+            setLoading(false); 
+        }
+    }, []);
 
     useEffect(() => {
-        
         const handleStorageChange = (e) => {
             if (e.key === "token") {
-                setToken(e.newValue);
+                console.log("Cambio en localStorage detectado. Nuevo valor:", e.newValue);
+                processTokenAndSetState(e.newValue); 
             }
         };
         window.addEventListener("storage", handleStorageChange);
@@ -94,14 +127,25 @@ export const ClassProvider = ({ children }) => {
         };
     }, []);
 
+    // Este efecto se dispara cuando el 'token' o 'userData' cambian, para cargar las clases
+    useEffect(() => {
+        if (token && userData) {
+            fetchClasses();
+        } else if (!token) {
+            setClasses([]);
+            setLoading(false);
+        }
+    }, [token, userData?.id_user, userData?.rol_name]); 
+
     const contextValue = {
+        token,
         userData,
         classes,
         setClasses,
         loading,
         fetchClasses,
         addClass,
-        setToken,
+        setToken: processTokenAndSetState,
         selectedRoom,
         selectClass,
         logout

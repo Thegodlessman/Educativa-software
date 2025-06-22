@@ -106,7 +106,7 @@ function RegisterStundentForm({ id_room }) {
                         </div>
                     ) : (
                         <Button type="submit" className="btn-register w-100 fw-bold" size="lg">
-                            Crear Cuenta
+                            Registrar Estudiante
                         </Button>
                     )}
                 </Form>
