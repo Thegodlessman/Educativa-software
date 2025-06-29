@@ -10,6 +10,8 @@ import ForgotPasswordPage from './views/ForgotPasswordPage/ForgotPasswordPage.js
 import ResetPasswordPage from './views/ResetPasswordPage/ResetPasswordPage.jsx';
 import FastAccessPage from './views/FastAccessPage/FastAccessPage.jsx';
 
+import AdminDashboard from './views/AdminDashboard/AdminDashboard';
+
 import RoleProtectedRoute from './components/RoleProtectedRoute/RoleProtectedRoute';
 
 function App() {
@@ -36,9 +38,14 @@ function App() {
                     <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
                     <Route path="/fast-access" element={<FastAccessPage/>}/>
 
-                    <Route element={<RoleProtectedRoute allowedRoles={['usuario', 'Estudiante', 'Profesor', 'administrador', 'Desarrollador']} />}>
+                    <Route element={<RoleProtectedRoute allowedRoles={['usuario', 'Estudiante', 'Profesor', 'Administrador', 'Desarrollador']} />}>
                         <Route path="/profile" element={<ProfilePage />} />
                     </Route>
+
+                    <Route element={<RoleProtectedRoute allowedRoles={['Administrador', 'Desarrollador']} />}>
+                        <Route path="/admin/*" element={<AdminDashboard />} />
+                    </Route>
+
                 </Routes>
             </Router>
         </>

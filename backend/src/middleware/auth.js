@@ -1,4 +1,4 @@
-import { verifyToken } from "../helpers/generateToken";
+import { verifyToken } from "../helpers/generateToken.js";
 
 const authMiddleware = async (req, res, next) => {
     try{

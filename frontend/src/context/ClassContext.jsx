@@ -63,8 +63,17 @@ export const ClassProvider = ({ children }) => {
                 endpoint = `${import.meta.env.VITE_BACKEND_URL}room/classes/created`;
             } else if (rol_name === "Estudiante") {
                 endpoint = `${import.meta.env.VITE_BACKEND_URL}room/classes/joined`;
+            } else if (rol_name === "Administrador") {
+                setClasses([]);
+                setLoading(false);
+                return;
+            } else if (rol_name === "usuario") {
+                setClasses([]);
+                setLoading(false);
+                return;
             } else {
                 console.warn("Rol no reconocido, no se pueden cargar las clases.");
+                console.log(rol_name)
                 setClasses([]);
                 setUserData(null);
                 return;
