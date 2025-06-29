@@ -123,7 +123,7 @@ function FastAccessPage() {
                             <Card key={student.id_user} className="student-card" onClick={() => handleStudentSelect(student)}>
                                 <Card.Img variant="top" src={student.user_url || 'https://via.placeholder.com/150?text=Perfil'} />
                                 <Card.Body>
-                                    <Card.Title>{student.user_nmae} {student.user_lastname}</Card.Title>
+                                    <Card.Title>{student.user_name} {student.user_lastname}</Card.Title>
                                 </Card.Body>
                             </Card>
                         ))}

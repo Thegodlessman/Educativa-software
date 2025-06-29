@@ -1,0 +1,80 @@
+@startuml "Diagrama de Componentes - Educativa Software"
+
+!theme vibrant
+
+actor "Usuario" as User
+
+package "Frontend (React SPA)" <<Cloud>> {
+  component "Navegador del Usuario" as Browser
+  
+  package "Aplicación React" {
+    component "Router" as ReactRouter
+    component "Gestión de Estado (Context)" as ReactContext
+    component "Cliente API REST (Axios)" as AxiosClient
+    component "Cliente WebSocket (Socket.io)" as SocketClient
+    component "Motor de Juego (Pixi.js)" as PixiEngine
+    component "Componentes UI (AntD, Bootstrap)" as UI
+  }
+
+  User -right-> Browser : "Interactúa"
+  Browser ..> ReactRouter : "Renderiza Vistas"
+  ReactRouter ..> UI : "Usa"
+  UI ..> ReactContext : "Consume Estado"
+  
+  ReactContext --down--> AxiosClient : "Dispara Peticiones"
+  PixiEngine --down--> SocketClient : "Envía Métricas del Juego"
+}
+
+package "Backend (Node.js)" <<Node>> {
+  package "Servidor Express.js" {
+    component "API REST" as RestAPI
+    component "Servidor WebSocket" as SocketServer
+    component "Middleware (Auth, Validator)" as Middleware
+
+    RestAPI -left- Middleware : "Usa"
+  }
+  
+  package "Lógica de Negocio" {
+    component "Controladores" as Controllers
+    component "Calculador de Riesgo" as RiskCalculator
+    component "Generador de PDF" as PdfGenerator
+  }
+
+  Controllers ..> RiskCalculator
+  Controllers ..> PdfGenerator
+  RestAPI -->> Controllers
+  SocketServer -->> Controllers
+}
+
+package "Capa de Datos y Servicios" {
+  database "PostgreSQL DB" as DB {
+    collections "Usuarios" as UsersTbl
+    collections "Clases" as RoomsTbl
+    collections "Pruebas" as TestsTbl
+    collections "Métricas" as MetricsTbl
+    collections "Recursos" as MaterialsTbl
+  }
+
+  cloud "Cloudinary" as Cloudinary {
+    artifact "Imágenes (perfil, aulas)" as Images
+  }
+  
+  cloud "Servicio SMTP" as SMTP
+}
+
+
+' --- Conexiones ---
+AxiosClient -right-> RestAPI : "HTTPS/JSON\n(Login, Gestión de Clases)"
+SocketClient -right-> SocketServer : "WebSocket (WSS)\n(Resultados de Prueba en Tiempo Real)"
+
+RestAPI -down-> DB : "Lee/Escribe Datos\n(pg)"
+SocketServer -down-> DB : "Escribe Resultados\n(pg)"
+
+Controllers -right-> SMTP : "Envía Correo\n(reset password)"
+
+' Conexión a Cloudinary
+RestAPI -up-> Cloudinary : "Sube Imágenes\n(API, multer)"
+Browser -up-> Cloudinary : "Obtiene Imágenes\n(HTTPS)"
+
+
+@enduml

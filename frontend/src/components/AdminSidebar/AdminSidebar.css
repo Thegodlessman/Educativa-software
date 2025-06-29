@@ -1,0 +1,38 @@
+.admin-sidebar {
+    background-color: #343a40;
+    color: #f8f9fa;
+    padding: 1.5rem 1rem;
+    min-height: calc(100vh - 60px); /* Resta la altura del navbar */
+    width: 280px;
+}
+
+.admin-sidebar-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: #ffffff;
+}
+
+.admin-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    color: #ced4da;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.admin-nav-link:hover {
+    background-color: #495057;
+    color: #ffffff;
+}
+
+.admin-nav-link.active {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    font-weight: 600;
+}
