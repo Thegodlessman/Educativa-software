@@ -136,3 +136,80 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); 
   position: relative; 
 }
+
+.student-card-actions {
+  display: flex;
+  flex-direction: column; /* Apila los botones verticalmente */
+  gap: 0.5rem; /* Espacio entre los botones */
+  opacity: 0; /* Oculto por defecto */
+  transition: opacity 0.2s ease-in-out;
+}
+
+.student-card:hover .student-card-actions {
+  opacity: 1; /* Se hace visible cuando el cursor está sobre la tarjeta */
+}
+
+.student-card-actions .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%; /* Botones circulares */
+  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Estilos para el Modal de Edición --- */
+.edit-student-modal .modal-content {
+  border-radius: 1rem;
+  border: none;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.edit-student-modal .modal-header {
+  background: var(--primary-color);/* Un gradiente como el de CreateRoom */
+  color: white;
+  border-bottom: none;
+}
+
+.edit-student-modal .modal-header .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.edit-student-modal .modal-body {
+  padding: 2rem;
+}
+
+.edit-student-modal .icon-prefix {
+  background-color: #F9FAFB;
+  border-right: none !important;
+  color: #6B7280;
+  width: 45px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.edit-student-modal .form-control {
+  border-left: none !important;
+}
+
+.edit-student-modal .form-control:focus {
+  box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+  border-color: #ced4da !important;
+}
+
+.btn-save-student {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease;
+}
+
+.btn-save-student:hover {
+  background-color: var(--secondary-color_gradient);
+  border-color: var(--secondary-color_gradient);
+  transform: translateY(-2px);
+}
