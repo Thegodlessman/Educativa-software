@@ -4,6 +4,8 @@ import { check, validationResult } from "express-validator";
 import { encrypt, compare } from "../helpers/handleBcrypt.js";
 import { tokenSign } from "../helpers/generateToken.js";
 import { randomBytes, createHash } from 'crypto';
+import cloudinary from '../cloudinary.js'; 
+import streamifier from 'streamifier'; 
 
 export const getUsers = async (req, res) => { //* Obtener todos los usuarios
     const { rows } = await pool.query('SELECT * FROM "users"');
@@ -142,16 +144,30 @@ export const createUser = async (req, res) => { //* Crear Usuario
 
 export const createStudent = async (req, res) => {
     try {
-        const {user_ced, user_name, user_lastname, user_email} = req.body
-        const { id_room } = req.params
+        const { user_ced, user_name, user_lastname, user_email } = req.body;
+        const { id_room } = req.params;
 
-        const user_url = `${process.env.CLOUDNARY_URL_IMG}educativa/Educativa-Profile`;
+        let user_url = `${process.env.CLOUDNARY_URL_IMG}educativa/Educativa-Profile`; 
+
+        if (req.file) {
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    { folder: "educativa/profiles" },
+                    (error, result) => {
+                        if (error) reject(error);
+                        resolve(result);
+                    }
+                );
+                streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+            });
+            user_url = result.secure_url;
+        }
 
         const queryRole = `SELECT id_rol FROM "roles" WHERE rol_name = 'Estudiante'`;
         const { rows: roleRows } = await pool.query(queryRole);
         const id_rol = roleRows[0].id_rol;
 
-        const query1 = 'SELECT * FROM "users" WHERE user_email = $1 ';
+        const query1 = 'SELECT * FROM "users" WHERE user_email = $1';
         const { rowCount: emailCount } = await pool.query(query1, [user_email]);
         if (emailCount > 0) {
             return res.status(400).json({ message: "El email ya ha sido registrado" });
@@ -166,8 +182,8 @@ export const createStudent = async (req, res) => {
         const temporalPassword = randomBytes(16).toString('hex');
 
         const { rows, rowCount } = await pool.query(
-            `INSERT INTO "users" (id_user, user_url, user_ced, user_name, user_lastname, user_email, user_password, active_role)
-            VALUES (default, $1, $2, $3, $4, $5, $6, $7) 
+            `INSERT INTO "users" (user_url, user_ced, user_name, user_lastname, user_email, user_password, active_role)
+            VALUES ($1, $2, $3, $4, $5, $6, $7) 
             RETURNING *`,
             [user_url, user_ced, user_name, user_lastname, user_email, temporalPassword, id_rol]
         );
@@ -191,10 +207,10 @@ export const createStudent = async (req, res) => {
         return res.status(200).json({ message: 'Usuario creado y unido exitosamente', user: newUser });
 
     } catch (error) {
-        console.error("Error registrando el usuario:", error)
+        console.error("Error registrando el usuario:", error);
         return res.status(500).json({ message: "Error del servidor" });
     }
-}
+};
 
 export const deleteUser = async (req, res) => { //* Borrar usuario
     const { id } = req.params;

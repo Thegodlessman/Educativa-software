@@ -5,18 +5,25 @@ import { ping } from "ldrs";
 import { notifyError, notifySuccess } from "../../utils/notify";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faIdCard, faEnvelope, faCamera } from '@fortawesome/free-solid-svg-icons';
+import './RegisterStudentForm.css';
 
 ping.register();
 
 function RegisterStundentForm({ id_room }) {
-    const [user_name, setName] = useState("");
-    const [user_lastname, setLastName] = useState("");
-    const [user_ced, setCed_user] = useState("");
-    const [user_email, setEmail] = useState("");
+    const [formData, setFormData] = useState({
+        user_name: "",
+        user_lastname: "",
+        user_ced: "",
+        user_email: ""
+    });
     const [errors, setErrors] = useState({});
     const [pressButton, setPressButton] = useState(false);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
+
+    const handleInputChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -32,121 +39,110 @@ function RegisterStundentForm({ id_room }) {
     const removeImage = () => {
         setSelectedImage(null);
         setPreviewUrl(null);
-        const inputFile = document.getElementById('file-upload');
-        if (inputFile) inputFile.value = "";
+        document.getElementById('file-upload-student').value = "";
+    };
+
+    const resetForm = () => {
+        setFormData({ user_name: "", user_lastname: "", user_ced: "", user_email: "" });
+        removeImage();
+        setErrors({});
+        setPressButton(false);
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
         setErrors({});
         setPressButton(true);
-
-        const studentData = { user_ced, user_name, user_lastname, user_email };
+        
+        const data = new FormData();
+        Object.keys(formData).forEach(key => data.append(key, formData[key]));
+        if (selectedImage) {
+            data.append('photo', selectedImage);
+        }
 
         try {
-            await axios.post(`${import.meta.env.VITE_BACKEND_URL}users/${id_room}/register-student`,
-                studentData);
-            notifySuccess("¡Se ha registrado el estudiante!");
-
-            setName("")
-            setLastName("")
-            setCed_user("")
-            setEmail("")
-            setErrors("")
-            setPressButton(false)
-
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}users/${id_room}/register-student`, data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            notifySuccess("¡El estudiante ha sido registrado exitosamente!");
+            resetForm();
         } catch (error) {
-            if (error.response?.data?.errors) {
-                const backendErrorsArray = error.response.data.errors;
-
-                const fieldErrors = backendErrorsArray.reduce((acc, err) => {
-                    if (!acc[err.field]) {
-                        acc[err.field] = err.msg;
-                    }
-                    return acc;
-                }, {});
+            const errData = error.response?.data;
+            if (errData?.errors) {
+                const fieldErrors = errData.errors.reduce((acc, err) => ({ ...acc, [err.path]: err.msg }), {});
                 setErrors(fieldErrors);
-
-                const firstErrorMessage = backendErrorsArray[0]?.msg || "Error de validación.";
-                notifyError(firstErrorMessage);
-
+                notifyError(errData.errors[0]?.msg || "Error de validación.");
             } else {
-                notifyError(error.response?.data?.message || "Error en el registro.");
+                notifyError(errData?.message || "Error en el registro.");
             }
+        } finally {
             setPressButton(false);
         }
     };
 
     return (
         <div className="register-student-container">
-            <h2 className="mb-4 fw-bold text-center">Registro Rapido de Estudiantes</h2>
-
+            <h2 className="mb-4 fw-bold text-center">Registro Rápido de Estudiantes</h2>
             <Form noValidate onSubmit={handleSubmit}>
-                <Row>
-                    <Col sm={6}>
+                <Row className="align-items-center">
+                    <Col md={7}>
                         <Form.Group className="mb-3">
                             <InputGroup>
                                 <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faUser} /></InputGroup.Text>
-                                <Form.Control type="text" placeholder="Nombre" value={user_name} onChange={(e) => setName(e.target.value)} isInvalid={!!errors.user_name} />
-                                <Form.Control.Feedback type="invalid">{errors.user_name}</Form.Control.Feedback>
+                                <Form.Control type="text" placeholder="Nombre" name="user_name" value={formData.user_name} onChange={handleInputChange} isInvalid={!!errors.user_name} />
+                            </InputGroup>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <InputGroup>
+                                <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faUser} /></InputGroup.Text>
+                                <Form.Control type="text" placeholder="Apellido" name="user_lastname" value={formData.user_lastname} onChange={handleInputChange} isInvalid={!!errors.user_lastname} />
+                            </InputGroup>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <InputGroup>
+                                <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faIdCard} /></InputGroup.Text>
+                                <Form.Control type="text" placeholder="Cédula" name="user_ced" value={formData.user_ced} onChange={handleInputChange} isInvalid={!!errors.user_ced} />
+                            </InputGroup>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <InputGroup>
+                                <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faEnvelope} /></InputGroup.Text>
+                                <Form.Control type="email" placeholder="Correo" name="user_email" value={formData.user_email} onChange={handleInputChange} isInvalid={!!errors.user_email} />
                             </InputGroup>
                         </Form.Group>
                     </Col>
-                    <Col sm={6}>
-                        <Form.Group className="mb-3">
-                            <InputGroup>
-                                <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faUser} /></InputGroup.Text>
-                                <Form.Control type="text" placeholder="Apellido" value={user_lastname} onChange={(e) => setLastName(e.target.value)} isInvalid={!!errors.user_lastname} />
-                                <Form.Control.Feedback type="invalid">{errors.user_lastname}</Form.Control.Feedback>
-                            </InputGroup>
-                        </Form.Group>
+                    <Col md={5}>
+                        <div className="d-flex flex-column align-items-center justify-content-center">
+                            <label htmlFor="file-upload-student" className="upload-zone-student">
+                                {previewUrl ? (
+                                    <img src={previewUrl} alt="Vista previa" className="preview-image-student" />
+                                ) : (
+                                    <div className="upload-placeholder-student">
+                                        <FontAwesomeIcon icon={faCamera} size="3x" />
+                                        <span>Subir foto (Opcional)</span>
+                                    </div>
+                                )}
+                            </label>
+                            <input id="file-upload-student" type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+                            {previewUrl && <Button variant="link" className="text-danger mt-2" onClick={removeImage}>Quitar Imagen</Button>}
+                        </div>
                     </Col>
                 </Row>
 
-                <Form.Group className="mb-3">
-                    <InputGroup>
-                        <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faIdCard} /></InputGroup.Text>
-                        <Form.Control type="text" placeholder="Cédula de Identidad" value={user_ced} onChange={(e) => setCed_user(e.target.value)} isInvalid={!!errors.user_ced} />
-                        <Form.Control.Feedback type="invalid">{errors.user_ced}</Form.Control.Feedback>
-                    </InputGroup>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                    <InputGroup>
-                        <InputGroup.Text className="icon-prefix"><FontAwesomeIcon icon={faEnvelope} /></InputGroup.Text>
-                        <Form.Control type="email" placeholder="Correo Electrónico" value={user_email} onChange={(e) => setEmail(e.target.value)} isInvalid={!!errors.user_email} />
-                        <Form.Control.Feedback type="invalid">{errors.user_email}</Form.Control.Feedback>
-                    </InputGroup>
-                </Form.Group>
-
-                <div className="d-flex flex-column align-items-center justify-content-center h-100">
-                    <label htmlFor="file-upload" className="upload-zone">
-                        {previewUrl ? (
-                            <img src={previewUrl} alt="Vista previa" className="preview-image" />
-                        ) : (
-                            <div className="upload-placeholder">
-                                <FontAwesomeIcon icon={faCamera} size="3x" />
-                                <span>Click para subir foto</span>
-                            </div>
-                        )}
-                    </label>
-                    <input id="file-upload" type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
-                    {previewUrl && <Button variant="link" className="text-danger mt-2" onClick={removeImage}>Quitar Imagen</Button>}
+                <div className="mt-4">
+                    {pressButton ? (
+                        <div className='text-center py-2'>
+                            <l-ping size="45" speed="2" color="#8552aa"></l-ping>
+                        </div>
+                    ) : (
+                        <Button type="submit" className="btn-register-student w-100 fw-bold" size="lg">
+                            Registrar Estudiante
+                        </Button>
+                    )}
                 </div>
-
-                {pressButton ? (
-                    <div className='text-center py-2'>
-                        <l-ping size="45" speed="2" color="#4f46e5"></l-ping>
-                    </div>
-                ) : (
-                    <Button type="submit" className="btn-register w-100 fw-bold" size="lg">
-                        Registrar Estudiante
-                    </Button>
-                )}
             </Form>
         </div>
     );
 }
 
-export default RegisterStundentForm
+export default RegisterStundentForm;
