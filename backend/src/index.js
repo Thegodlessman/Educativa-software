@@ -12,6 +12,7 @@ import testRouter from './routes/test.routes.js'
 import supportMaterialsRouter from './routes/supportMaterials.routes.js';
 import adminRouter from './routes/admin.routes.js'
 import reportRouter from './routes/reporter.routes.js';
+import teacherRouter from './routes/teacher.routes.js';
 
 import { calculateRiskProfile } from './helpers/riskCalculator.js';
 import { pool } from "./db.js";
@@ -27,6 +28,7 @@ app.use(cors({
     exposedHeaders: ['Content-Disposition']
 }));
 
+app.use('/api/teacher', teacherRouter); 
 app.use(userRoutes)
 app.use(profileRoutes)
 app.use(roomRoutes)

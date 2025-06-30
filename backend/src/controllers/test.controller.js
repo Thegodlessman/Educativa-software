@@ -50,6 +50,8 @@ export const getTestsByRoom = async (req, res) => {
             SELECT 
                 u.id_user,
                 CONCAT(u.user_name, ' ', u.user_lastname) AS student_name,
+                u.user_ced,
+                u.user_email, 
                 t.id_test,
                 t.id_risk_level,
                 t.final_score,
