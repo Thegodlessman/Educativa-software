@@ -19,8 +19,7 @@ export const ClassProvider = ({ children }) => {
     const [userData, setUserData] = useState(null);
     const [selectedRoom, setSelectedRoom] = useState(null);
 
-    const processTokenAndSetState = (newToken) => {
-        console.log("processTokenAndSetState llamado con:", newToken); 
+    const processTokenAndSetState = (newToken) => { 
         if (newToken && typeof newToken === 'string' && newToken.trim() !== '') {
             try {
                 localStorage.setItem('token', newToken); 
@@ -37,7 +36,7 @@ export const ClassProvider = ({ children }) => {
                 logout(); 
             }
         } else {
-            console.log("Token inválido o vacío pasado a processTokenAndSetState, limpiando sesión.");
+            //console.log("Token inválido o vacío pasado a processTokenAndSetState, limpiando sesión.");
             logout();
         }
     };
@@ -50,7 +49,7 @@ export const ClassProvider = ({ children }) => {
         setLoading(true); 
         try {
             if (!token || !userData) {
-                console.log("No token o userData disponible para fetchClasses, saltando la carga.");
+                //console.log("No token o userData disponible para fetchClasses, saltando la carga.");
                 setClasses([]);
                 setUserData(null);n
                 return;
@@ -73,7 +72,6 @@ export const ClassProvider = ({ children }) => {
                 return;
             } else {
                 console.warn("Rol no reconocido, no se pueden cargar las clases.");
-                console.log(rol_name)
                 setClasses([]);
                 setUserData(null);
                 return;
@@ -104,7 +102,7 @@ export const ClassProvider = ({ children }) => {
     };
 
     const logout = () => {
-        console.log("Ejecutando logout."); // Para depuración
+        //console.log("Ejecutando logout."); // Para depuración
         localStorage.removeItem('token');
         setToken(null); // Limpia el estado 'token'
         setUserData(null);
@@ -125,7 +123,7 @@ export const ClassProvider = ({ children }) => {
     useEffect(() => {
         const handleStorageChange = (e) => {
             if (e.key === "token") {
-                console.log("Cambio en localStorage detectado. Nuevo valor:", e.newValue);
+                //console.log("Cambio en localStorage detectado. Nuevo valor:", e.newValue);
                 processTokenAndSetState(e.newValue); 
             }
         };

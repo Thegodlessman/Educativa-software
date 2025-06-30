@@ -27,6 +27,8 @@ import {
 
 import capitalizeNames from "../middleware/format.js";
 
+import upload from '../multer.js'
+
 const router = Router();
 
 //*Traer a todos los usuarios
@@ -58,7 +60,7 @@ router.post('/forgot-password', validateForgotPassword, forgotPassword);
 
 router.post('/reset-password/:token', validateResetPassword, resetPassword)
 
-router.post('/users/:id_room/register-student', validateCreateStudent, createStudent)
+router.post('/users/:id_room/register-student', upload.single('photo'), capitalizeNames, validateCreateStudent, createStudent)
 
 router.post('/fast-login', fastLogin);
 
