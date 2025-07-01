@@ -35,9 +35,9 @@ const GameUI = ({ score, time, hits, omissions, commissions, collisions, onGameE
                 <span className="metric-label">COLISIONES</span>
                 <span className="metric-value">{collisions}</span>
             </div> */}
-            <button onClick={onGameEnd} className="end-game-button">
+            {/* <button onClick={onGameEnd} className="end-game-button">
                 Terminar Prueba
-            </button>
+            </button> */}
         </div>
     );
 };

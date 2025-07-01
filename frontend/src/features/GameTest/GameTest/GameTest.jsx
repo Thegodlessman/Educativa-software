@@ -52,7 +52,7 @@ const GameTest = ({ userId, id_room, onGameEnd: onTestComplete, studentName, id_
 
     const handleGameEnd = useCallback((finalMetrics) => {
         setGameState('finished');
-        setCurrentMetrics(finalMetrics); // <-- Guardamos las métricas finales para mostrarlas
+        setCurrentMetrics(finalMetrics);
 
         if (socket) {
             const metricsToSend = {
@@ -63,11 +63,9 @@ const GameTest = ({ userId, id_room, onGameEnd: onTestComplete, studentName, id_
             };
             socket.emit('submitGameTestResults', metricsToSend);
         }
-        // --- LÍNEA PROBLEMÁTICA ELIMINADA ---
-        // if (onTestComplete) onTestComplete(); 
+
     }, [socket, id_test_actual, userId, id_room, answeredQuestions]);
 
-    // --- NUEVA FUNCIÓN PARA CERRAR LA PANTALLA FINAL ---
     const handleCloseReport = () => {
         if (onTestComplete) {
             onTestComplete();
@@ -75,13 +73,13 @@ const GameTest = ({ userId, id_room, onGameEnd: onTestComplete, studentName, id_
     };
 
     const handleShowQuestion = useCallback((questionIndex) => {
-        // Esta función necesita ser definida antes de pasarse a usePixiGame
+
         if (pauseGame) pauseGame();
         if (questions[questionIndex]) {
             setCurrentQuestion(questions[questionIndex]);
             setGameState('paused');
         }
-    }, []); // La dependencia de pauseGame se maneja al declarar el hook
+    }, []);
 
     const { pixiContainerRef, startGame, pauseGame, resumeGame, endGame } = usePixiGame({
         assets,
@@ -92,7 +90,6 @@ const GameTest = ({ userId, id_room, onGameEnd: onTestComplete, studentName, id_
         id_test_actual: id_test_actual,
     });
 
-    // Asignamos la dependencia aquí para evitar errores de linting y asegurar que la función está disponible.
     useEffect(() => {
         handleShowQuestion.dependencies = [pauseGame];
     }, [pauseGame, handleShowQuestion]);
@@ -123,7 +120,6 @@ const GameTest = ({ userId, id_room, onGameEnd: onTestComplete, studentName, id_
                 {gameState === 'loading' && <LoadingScreen progress={loadProgress} />}
                 {gameState === 'ready' && <ReadyScreen onStart={handleStartGame} />}
 
-                {/* Ahora pasamos la nueva función onClose al componente */}
                 {gameState === 'finished' && <FinishedScreen finalMetrics={currentMetrics} onClose={handleCloseReport} />}
 
                 <div style={{ position: 'relative', display: isGameVisible ? 'block' : 'none', width: '800px', height: '600px', margin: 'auto' }}>
