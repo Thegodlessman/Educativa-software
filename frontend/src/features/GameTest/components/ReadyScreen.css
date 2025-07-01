@@ -1,0 +1,111 @@
+.ready-screen-overlay {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #0c0c1e; /* Fondo oscuro del juego */
+}
+
+.ready-screen-panel {
+    width: 700px;
+    background: linear-gradient(145deg, rgba(15, 32, 72, 0.8), rgba(25, 52, 112, 0.8));
+    border: 2px solid rgba(127, 207, 255, 0.7);
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(0, 191, 255, 0.4);
+    color: #e0f7ff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.ready-header {
+    background-color: rgba(127, 207, 255, 0.2);
+    padding: 10px 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(127, 207, 255, 0.5);
+    font-weight: bold;
+    letter-spacing: 3px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.ready-content {
+    padding: 30px 40px;
+}
+
+.ready-content h2 {
+    text-align: center;
+    color: #56d3ff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 25px;
+    text-shadow: 0 0 8px #56d3ff;
+}
+
+.ready-content p {
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.ready-content strong {
+    color: #fdd835; /* Amarillo para resaltar teclas */
+    font-weight: bold;
+}
+
+.warning-section {
+    margin-top: 30px;
+    padding: 15px;
+    background-color: rgba(255, 100, 100, 0.1);
+    border: 1px solid rgba(255, 100, 100, 0.4);
+    border-radius: 5px;
+}
+
+.warning-section h3 {
+    text-align: center;
+    color: #ff6464;
+    margin: 0 0 10px 0;
+    text-transform: uppercase;
+}
+
+.warning-section p {
+    font-size: 16px;
+    margin-bottom: 0;
+}
+
+.ready-footer {
+    padding: 25px;
+    text-align: center;
+}
+
+.start-mission-button {
+    background-color: #28a745; /* Verde de "iniciar" */
+    color: white;
+    padding: 15px 50px;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
+}
+
+.start-mission-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(40, 167, 69, 0.8);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

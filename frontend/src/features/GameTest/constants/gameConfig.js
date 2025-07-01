@@ -4,7 +4,7 @@ export const GAME_CONFIG = {
     BACKGROUND_COLOR: 0x0c0c1e,
     GAME_DURATION: 600000, // 10 minutos en ms
     // Aproximadamente una pregunta cada 90 segundos para tener 6 preguntas en 10 min
-    QUESTION_INTERVAL: 10000, 
+    QUESTION_INTERVAL: 90000, 
 };
 
 export const PLAYER_CONFIG = {
@@ -40,20 +40,24 @@ export const PERSPECTIVE_CONFIG = {
 };
 
 export const DIFFICULTY_SETTINGS = {
-    INITIAL_GAMESPEED_Y: 4,
-    INITIAL_OBSTACLE_SPEED: 4,
-    // El multiplicador máximo ahora es más bajo para que no sea injugable a los 10 min
-    MAX_SPEED_MULTIPLIER: 1.6, 
-    // Aumento de la velocidad cada 45 segundos para que haya progresión constante
-    SPEED_INCREASE_INTERVAL: 45000, 
-    // El factor de aumento es más pequeño para que sea gradual
-    SPEED_INCREASE_FACTOR: 1.05, 
-    
-    INITIAL_SPAWN_INTERVAL: 1300,
-    MIN_SPAWN_INTERVAL: 600,
-    SPAWN_INTERVAL_DECREASE: 35, // Se reduce el intervalo más lentamente
-};
+    INITIAL_GAMESPEED_Y: 5, // Antes era 4
+    INITIAL_OBSTACLE_SPEED: 5, // Antes era 4
 
+    // El juego se acelera más a menudo.
+    SPEED_INCREASE_INTERVAL: 30000, 
+    
+    // Cada aumento de velocidad es más significativo.
+    SPEED_INCREASE_FACTOR: 1.06, 
+
+    // Los obstáculos aparecen con más frecuencia desde el principio.
+    INITIAL_SPAWN_INTERVAL: 1100,
+
+    // Aumentamos la densidad máxima de obstáculos en el final del juego.
+    MIN_SPAWN_INTERVAL: 500, 
+
+    // La tasa de aparición de obstáculos se acelera más rápido.
+    SPAWN_INTERVAL_DECREASE: 40,
+};
 export const GAME_RULES = {
     // Puntuaciones
     HIT_REWARD: 10,

@@ -139,7 +139,7 @@ io.on('connection', (socket) => {
                     missed_shots, total_time, reaction_time_variability
                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
             `;
-            const rMS = (receivedMetrics.missed_shots || 0) - (receivedMetrics.correct_hits || 0);
+            
             const gameDurationSeconds = (receivedMetrics.totalGameDuration || 0) > 0 ? (receivedMetrics.totalGameDuration / 1000) : 0;
 
             await client.query(metricsInsertQuery, [
@@ -149,7 +149,7 @@ io.on('connection', (socket) => {
                 receivedMetrics.collision_errors || 0,
                 receivedMetrics.omission_errors || 0,
                 receivedMetrics.commission_errors || 0,
-                rMS,
+                receivedMetrics.missed_shots ,
                 gameDurationSeconds ? parseFloat(gameDurationSeconds.toFixed(2)) : null,
                 parseFloat(riskProfile.analytics.reactionTimeVariability) || null
             ]);

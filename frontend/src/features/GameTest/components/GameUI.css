@@ -1,0 +1,60 @@
+.game-ui-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 110px; /* Ancho del panel */
+    padding: 15px;
+    background-color: rgba(10, 25, 47, 0.85); /* Fondo azul oscuro */
+    border: 1px solid rgba(56, 161, 224, 0.6);
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(56, 161, 224, 0.3);
+    color: #e0f7ff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column; /* Apila los elementos verticalmente */
+    gap: 12px; /* Espacio entre cada métrica */
+    z-index: 100;
+}
+
+.metric-item {
+    display: flex;
+    justify-content: space-between; /* Alinea etiqueta a la izquierda y valor a la derecha */
+    align-items: center;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(56, 161, 224, 0.2);
+}
+
+.metric-item:last-of-type {
+    border-bottom: none; /* El último elemento no necesita borde */
+}
+
+.metric-label {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(224, 247, 255, 0.8);
+}
+
+.metric-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #56d3ff; /* Un azul cian brillante */
+    text-shadow: 0 0 5px #56d3ff;
+}
+
+.end-game-button {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #c9302c; /* Rojo de "terminar" */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.end-game-button:hover {
+    background-color: #a92824;
+}
