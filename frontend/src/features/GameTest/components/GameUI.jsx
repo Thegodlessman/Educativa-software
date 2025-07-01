@@ -1,28 +1,42 @@
 import React from 'react';
-import '../GameTest.css';
+import './GameUI.css';
+
+const formatTime = (timeInMs) => {
+    const totalSeconds = Math.floor(timeInMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
 
 const GameUI = ({ score, time, hits, omissions, commissions, collisions, onGameEnd }) => {
-    const formatTime = (ms) => {
-        const totalSeconds = Math.floor(ms / 1000);
-        const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-        const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-        return `${minutes}:${seconds}`;
-    };
-
     return (
-        <div className="game-ui-overlay">
-            <div className="game-stats-main">
-                <span>Puntuación: <strong>{score}</strong></span>
-                <span>Tiempo: <strong>{formatTime(time)}</strong></span>
+        <div className="game-ui-container">
+            <div className="metric-item">
+                <span className="metric-label">TIEMPO</span>
+                <span className="metric-value">{formatTime(time)}</span>
             </div>
-            <div className="game-stats-debug">
-                <span>Aciertos: <strong>{hits}</strong></span>
-                <span>Omisión: <strong>{omissions}</strong></span>
-                <span>Comisión: <strong>{commissions}</strong></span>
-                <span>Choques: <strong>{collisions}</strong></span>
+            <div className="metric-item">
+                <span className="metric-label">PUNTOS</span>
+                <span className="metric-value">{score}</span>
             </div>
-            <button onClick={onGameEnd} className="debug-end-button">
-                Terminar
+            {/* <div className="metric-item">
+                <span className="metric-label">ACIERTOS</span>
+                <span className="metric-value">{hits}</span>
+            </div>
+            <div className="metric-item">
+                <span className="metric-label">ERRORES COMISIÓN</span>
+                <span className="metric-value">{commissions}</span>
+            </div>
+            <div className="metric-item">
+                <span className="metric-label">ERRORES OMISIÓN</span>
+                <span className="metric-value">{omissions}</span>
+            </div>
+            <div className="metric-item">
+                <span className="metric-label">COLISIONES</span>
+                <span className="metric-value">{collisions}</span>
+            </div> */}
+            <button onClick={onGameEnd} className="end-game-button">
+                Terminar Prueba
             </button>
         </div>
     );

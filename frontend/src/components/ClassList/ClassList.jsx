@@ -180,7 +180,7 @@ function ClassList() {
       if (!id_test_creado_en_backend) {
         throw new Error("El backend no devolvió un ID de prueba válido.");
       }
-      notifySuccess("Prueba iniciada. Preparando juego...");
+      notifySuccess("Preparando juego...");
       setGameProps({
         id_test_actual: id_test_creado_en_backend,
         userId: userData.id_user,
@@ -216,11 +216,11 @@ function ClassList() {
     notifySuccess("Juego finalizado. Resultados enviados.");
     setIsGameActive(false);
     setGameProps(null);
-    const currentSelectedRoom = selectedRoom;
-    currentSelectedRoom(null);
-    setTimeout(() => currentSelectedRoom(currentSelectedRoom), 0);
+    if (userData.rol_name === "Estudiante") {
+      fetchStudentStatus(selectedRoom.id_room, userData.id_user);
+    }
+    selectClass(null); // Vuelve a la lista de clases
   };
-
   const handleShowStudentDetail = (student) => {
     if (student.id_test) {
       setSelectedStudentForDetail(student);
@@ -342,18 +342,18 @@ function ClassList() {
                 </div>
               ) : studentTestStatus?.isCompleted ? (
                 <div className="text-center text-success">
-                  <h4>¡Prueba completada!</h4>
+                  <h4>¡Misión completada!</h4>
                   {studentTestStatus.finalScore !== null && <p>Puntuación: {studentTestStatus.finalScore}</p>}
                   <p className="text-muted mt-3">Consulta detalles con tu profesor.</p>
                 </div>
               ) : studentTestStatus?.isAssigned === false && !studentTestStatus?.testId ? (
                 <div className="text-center text-info">
-                  <h4>No hay prueba asignada en esta clase.</h4>
+                  <h4>No hay una misión asignada en esta clase.</h4>
                   <p className="text-muted mt-3">Consulta con tu profesor.</p>
                 </div>
               ) : (
                 <div className="text-center">
-                  <h4>Prueba de TDAH pendiente.</h4>
+                  <h4>Misión pendiente</h4>
                   <Button
                     variant="primary"
                     onClick={handleStartTestStudent}
@@ -361,7 +361,7 @@ function ClassList() {
                     className="mt-3 px-4 py-2"
                   >
                     {startingTestStudentView ? <Spinner animation="border" size="sm" className="me-2" /> : null}
-                    {startingTestStudentView ? 'Iniciando...' : 'Iniciar Prueba'}
+                    {startingTestStudentView ? 'Iniciando...' : 'Iniciar Misión'}
                   </Button>
                   <p className="text-muted mt-3">Haz clic para comenzar.</p>
                 </div>

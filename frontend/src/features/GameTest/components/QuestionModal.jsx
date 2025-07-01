@@ -1,46 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import '../GameTest.css';
+import React from 'react';
+import './QuestionModal.css'; // Usaremos el mismo archivo de estilos
 
 const QuestionModal = ({ question, onAnswer }) => {
-    const [selectedAnswer, setSelectedAnswer] = useState(null);
-
-    // Reiniciar la selección cuando la pregunta cambia
-    useEffect(() => {
-        setSelectedAnswer(null);
-    }, [question]);
-
-    const handleSubmit = () => {
-        if (selectedAnswer !== null) {
-            onAnswer({
-                questionText: question.text,
-                answer: selectedAnswer,
-                timestamp: Date.now(),
-            });
-        }
+    // Esta función ahora pasa el valor del botón a onAnswer
+    const handleAnswerClick = (answer) => {
+        onAnswer({ questionId: question.id, answer: answer });
     };
 
     return (
-        <div className="question-modal-backdrop">
-            <div className="question-modal-content">
-                <h3>{question.text}</h3>
-                <div className="question-modal-options">
-                    {question.options.map((option, index) => (
-                        <button
-                            key={index}
-                            onClick={() => setSelectedAnswer(option)}
-                            className={selectedAnswer === option ? 'selected' : ''}
-                        >
-                            {option}
-                        </button>
-                    ))}
+        <div className="modal-overlay">
+            <div className="modal-hologram-panel">
+                <div className="modal-header">
+                    <p>// EVALUACIÓN DE ESTADO //</p>
                 </div>
-                <button
-                    className="question-modal-submit"
-                    onClick={handleSubmit}
-                    disabled={selectedAnswer === null}
-                >
-                    Enviar Respuesta
-                </button>
+                <div className="modal-content">
+                    <p className="modal-instruction-text">{question.text}</p>
+                </div>
+                <div className="modal-footer">
+                    {/* Contenedor para los botones de opción */}
+                    <div className="modal-options">
+                        <button 
+                            onClick={() => handleAnswerClick('Sí')} 
+                            className="modal-option-button yes-button"
+                        >
+                            SÍ
+                        </button>
+                        <button 
+                            onClick={() => handleAnswerClick('No')} 
+                            className="modal-option-button no-button"
+                        >
+                            NO
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );
