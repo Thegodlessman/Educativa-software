@@ -76,6 +76,7 @@ export const getTestsByRoom = async (req, res) => {
         `;
 
         const { rows } = await pool.query(query, [id_room]);
+        console.log(rows)
         res.status(200).json(rows);
     } catch (error) {
         console.error('Error al obtener los tests de la sala:', error);

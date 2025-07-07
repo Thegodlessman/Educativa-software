@@ -32,6 +32,11 @@ function ClassList() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
 
+  const [showDeleteClassModal, setShowDeleteClassModal] = useState(false);
+  const [showDeleteStudentModal, setShowDeleteStudentModal] = useState(false);
+  const [entityToDelete, setEntityToDelete] = useState(null); 
+  const [confirmationText, setConfirmationText] = useState("");
+
   const fetchStudentsForRoom = useCallback(async (roomId) => {
     if (!roomId) return;
     setLoadingStudents(true);
@@ -67,7 +72,7 @@ function ClassList() {
     setLoadingTestStatusStudentView(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}test/status/${roomId}/${userId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/test/status/${roomId}/${userId}`, { headers: { 'Authorization': `Bearer ${token}` } });
       setStudentTestStatus(response.data);
     } catch (error) {
       console.error("Error al cargar el estado de la prueba del estudiante:", error);
@@ -83,7 +88,7 @@ function ClassList() {
 
   useEffect(() => {
     if (selectedRoom && userData?.id_user) {
-      setSelectedStudentForDetail(null); // Reset detail view on room change
+      setSelectedStudentForDetail(null);
       if (userData.rol_name === "Profesor") {
         fetchStudentsForRoom(selectedRoom.id_room);
         fetchChartData(selectedRoom.id_room);
@@ -103,7 +108,7 @@ function ClassList() {
       id_user: student.id_user,
       user_name: nameParts[0] || '',
       user_lastname: nameParts.slice(1).join(' ') || '',
-      user_ced: student.user_ced || '',
+      user_ced: student.user_ced || '', 
       user_email: student.user_email || ''
     });
     setShowEditModal(true);
@@ -118,7 +123,7 @@ function ClassList() {
     if (!editingStudent) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`${import.meta.env.VITE_BACKEND_URL}api/teacher/students/${editingStudent.id_user}`, editingStudent, {
+      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/students/${editingStudent.id_user}`, editingStudent, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setShowEditModal(false);
@@ -129,87 +134,75 @@ function ClassList() {
     }
   };
 
-  const handleRemoveStudent = async (studentId) => {
-    if (window.confirm("¿Seguro que quieres eliminar a este estudiante de la clase? Sus datos de prueba en esta clase también se borrarán.")) {
-      try {
-        const token = localStorage.getItem('token');
-        await axios.delete(`${import.meta.env.VITE_BACKEND_URL}api/teacher/rooms/${selectedRoom.id_room}/students/${studentId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        setStudentsEvaluated(prev => prev.filter(s => s.id_user !== studentId));
-        notifySuccess("Estudiante eliminado de la clase.");
-      } catch (error) {
-        notifyError(error.response?.data?.message || "Error al eliminar.");
-      }
+  const handleRemoveStudent = (studentId) => {
+    setEntityToDelete(studentId);
+    setShowDeleteStudentModal(true);
+  };
+
+  const executeDeleteStudent = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/rooms/${selectedRoom.id_room}/students/${entityToDelete}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      setStudentsEvaluated(prev => prev.filter(s => s.id_user !== entityToDelete));
+      notifySuccess("Estudiante eliminado de la clase.");
+    } catch (error) {
+      notifyError(error.response?.data?.message || "Error al eliminar.");
+    } finally {
+      setShowDeleteStudentModal(false);
+      setEntityToDelete(null);
     }
   };
 
-  const handleDeleteClass = async () => {
-    const confirmation = prompt("Esta acción es irreversible y borrará la clase y todos los datos de sus estudiantes. Escribe 'ELIMINAR' para confirmar.");
-    if (confirmation === 'ELIMINAR') {
-      try {
-        const token = localStorage.getItem('token');
-        await axios.delete(`${import.meta.env.VITE_BACKEND_URL}api/teacher/rooms/${selectedRoom.id_room}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        selectClass(null);
-        await fetchClasses();
-        notifySuccess("Clase eliminada con éxito.");
-      } catch (error) {
-        notifyError(error.response?.data?.message || "Error al eliminar la clase.");
-      }
-    } else if (confirmation !== null) {
-      notifyError("Confirmación incorrecta. La clase no fue eliminada.");
+  const handleDeleteClass = () => {
+    setEntityToDelete(selectedRoom.id_room);
+    setShowDeleteClassModal(true);
+  };
+
+  const executeDeleteClass = async () => {
+    if (confirmationText !== 'ELIMINAR') {
+      notifyError("Texto de confirmación incorrecto.");
+      return;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/rooms/${entityToDelete}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      selectClass(null);
+      await fetchClasses();
+      notifySuccess("Clase eliminada con éxito.");
+    } catch (error) {
+      notifyError(error.response?.data?.message || "Error al eliminar la clase.");
+    } finally {
+      setShowDeleteClassModal(false);
+      setEntityToDelete(null);
+      setConfirmationText("");
     }
   };
 
   const handleStartTestStudent = async () => {
-    if (!selectedRoom || !userData?.id_user || startingTestStudentView) {
-      notifyWarning("No se puede iniciar la prueba: condiciones no cumplidas.");
-      return;
-    }
+    if (!selectedRoom || !userData?.id_user) return;
     setStartingTestStudentView(true);
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}test/start-student-test`,
+        `${import.meta.env.VITE_BACKEND_URL}/test/start-student-test`,
         { id_user: userData.id_user, id_room: selectedRoom.id_room },
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
-      const id_test_creado_en_backend = response.data.id_test;
-      if (!id_test_creado_en_backend) {
-        throw new Error("El backend no devolvió un ID de prueba válido.");
-      }
-      notifySuccess("Preparando juego...");
       setGameProps({
-        id_test_actual: id_test_creado_en_backend,
+        id_test_actual: response.data.id_test,
         userId: userData.id_user,
         id_room: selectedRoom.id_room
       });
       setIsGameActive(true);
     } catch (error) {
-      console.error("Error al iniciar la prueba:", error);
-      if (error.response) {
-        const errorMessage = error.response.data?.message || `Error HTTP ${error.response.status}`;
-        if (error.response.status === 409) {
-          notifyWarning(errorMessage);
-          const currentSelectedRoom = selectedRoom;
-          currentSelectedRoom(null);
-          setTimeout(() => currentSelectedRoom(currentSelectedRoom), 0);
-        } else {
-          notifyError(`No se pudo iniciar la prueba: ${errorMessage}`);
-        }
-      } else {
-        notifyError(`No se pudo iniciar la prueba: ${error.message}`);
-      }
+      notifyError(error.response?.data?.message || "No se pudo iniciar la prueba.");
     } finally {
       setStartingTestStudentView(false);
     }
-  };
-
-  const handleEditStudent = (student) => {
-    setEditingStudent(student);
-    setShowEditModal(true);
   };
 
   const handleGameEnd = () => {
@@ -218,55 +211,43 @@ function ClassList() {
     setGameProps(null);
     if (userData.rol_name === "Estudiante") {
       fetchStudentStatus(selectedRoom.id_room, userData.id_user);
+    } else {
+      selectClass(null);
     }
-    selectClass(null); // Vuelve a la lista de clases
   };
+
   const handleShowStudentDetail = (student) => {
     if (student.id_test) {
       setSelectedStudentForDetail(student);
     } else {
-      notifyInfo("Este estudiante aún no ha realizado una prueba o no hay datos disponibles.");
+      notifyInfo("Este estudiante aún no ha realizado la prueba.");
     }
   };
 
   const handleCloseStudentDetail = () => {
     setSelectedStudentForDetail(null);
     if (selectedRoom && userData?.rol_name === "Profesor") {
-      const currentSelectedRoom = selectedRoom;
-      currentSelectedRoom(null);
-      setTimeout(() => currentSelectedRoom(currentSelectedRoom), 0);
+      fetchStudentsForRoom(selectedRoom.id_room);
     }
   };
-
 
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center mt-5">
-        <Spinner animation="border" />
-        <span className="ms-2">Cargando...</span>
+        <Spinner animation="border" /> <span className="ms-2">Cargando...</span>
       </div>
     );
   }
 
   if (selectedStudentForDetail) {
-    return (
-      <StudentTestDetail
-        studentData={selectedStudentForDetail}
-        onClose={handleCloseStudentDetail}
-      />
-    );
+    return <StudentTestDetail studentData={selectedStudentForDetail} onClose={handleCloseStudentDetail} />;
   }
 
   if (isGameActive && gameProps) {
     return (
       <div className="game-modal-overlay">
         <div className="game-modal-content">
-          <GameTest
-            id_test_actual={gameProps.id_test_actual}
-            userId={gameProps.userId}
-            id_room={gameProps.id_room}
-            onGameEnd={handleGameEnd}
-          />
+          <GameTest {...gameProps} onGameEnd={handleGameEnd} />
         </div>
       </div>
     );
@@ -370,7 +351,48 @@ function ClassList() {
           ) : (
             <div className="text-center text-danger"><h4>Rol desconocido.</h4></div>
           )}
-        </div>
+        </div>  
+
+        <Modal show={showDeleteStudentModal} onHide={() => setShowDeleteStudentModal(false)} centered dialogClassName="cl-delete-modal">
+          <Modal.Header closeButton>
+            <Modal.Title><BsShieldExclamation className="me-2 text-danger" />Confirmar Eliminación</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>¿Estás seguro de que quieres eliminar a este estudiante de la clase?</p>
+            <p className="">Esta acción no se puede deshacer.</p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowDeleteStudentModal(false)}>Cancelar</Button>
+            <Button variant="danger" onClick={executeDeleteStudent}>Aceptar</Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={showDeleteClassModal} onHide={() => setShowDeleteClassModal(false)} centered dialogClassName="cl-delete-modal">
+          <Modal.Header closeButton>
+            <Modal.Title><BsShieldExclamation className="me-2 text-danger" />Confirmación Requerida</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>Esta acción es irreversible y borrará la clase junto con todos los datos de sus estudiantes.</p>
+            <p>Para confirmar, por favor escribe <strong>ELIMINAR</strong> en el campo de abajo.</p>
+            <Form.Control 
+              type="text"
+              value={confirmationText}
+              onChange={(e) => setConfirmationText(e.target.value)}
+              placeholder="Escribe aquí para confirmar"
+              className="mt-3 cl-delete-modal__confirm-input"
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowDeleteClassModal(false)}>Cancelar</Button>
+            <Button 
+              variant="danger" 
+              onClick={executeDeleteClass}
+              disabled={confirmationText !== 'ELIMINAR'}
+            >
+              Eliminar Permanentemente
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
         <Modal show={showEditModal} onHide={() => setShowEditModal(false)} centered dialogClassName="edit-student-modal">
           <Modal.Header closeButton><Modal.Title>Editar Estudiante</Modal.Title></Modal.Header>
