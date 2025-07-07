@@ -47,6 +47,7 @@
 
 .modal-footer {
     padding: 20px;
+    align-items: center;
     text-align: center;
 }
 
@@ -71,25 +72,25 @@
 }
 
 .yes-button {
-    border-color: #28a745; /* Verde para "Sí" */
-    color: #28a745;
+    border-color: #007bff; ; /* Verde para "Sí" */
+    color: #007bff; ;
 }
 
 .yes-button:hover {
-    background-color: #28a745;
+    background-color: #007bff; ;
     color: #fff;
-    box-shadow: 0 0 15px #28a745;
+    box-shadow: 0 0 15px #007bff; ;
 }
 
 .no-button {
-    border-color: #dc3545; /* Rojo para "No" */
-    color: #dc3545;
+    border-color: #007bff; ; /* Rojo para "No" */
+    color: #007bff; ;
 }
 
 .no-button:hover {
-    background-color: #dc3545;
+    background-color: #007bff;
     color: #fff;
-    box-shadow: 0 0 15px #dc3545;
+    box-shadow: 0 0 15px #007bff; ;
 }
 /* --- FIN DE ESTILOS NUEVOS --- */
 
