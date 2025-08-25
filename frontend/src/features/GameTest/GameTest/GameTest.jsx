@@ -25,15 +25,14 @@ import spaceBackground2 from '../assets/space_background_scrolling2.png';
 import spaceBackground3 from '../assets/space_background_scrolling3.png';
 
 const questions = [
-    { id: 1, text: "¿Cómo son tus clases?", options: ["Aburridas", "Divertidas"] },
-    { id: 2, text: "¿A menudo tienes mal genio o te enojas fácilmente?", options: ["Sí", "No"] },
-    { id: 3, text: "¿Te gusta leer libros?", options: ["Sí", "No"] },
-    { id: 4, text: "¿Te gusta conversar con tus compañeros durante las clases?", options: ["Sí", "No"] },
-    { id: 5, text: "¿Saltas, caminas o corres dentro del salón de clases?", options: ["Sí", "No"] },
-    { id: 6, text: "¿Mantienes tus cosas organizadas y guardadas adecuadamente?", options: ["Sí", "No"] },
-    { id: 7, text: "¿Te gusta jugar durante las clases?.", options: ["Sí", "No"] },
-    { id: 8, text: "¿Ayudas a recoger y organizar el salón de clase?", options: ["Sí", "No"] },
-    { id: 9, text: "¿Recuerdas fechas, nombres o tareas fácilmente?", options: ["Sí", "No"] }
+    { id: 1, text: "¿A menudo tienes mal genio o te enojas fácilmente?", options: ["Sí", "No"] },
+    { id: 2, text: "¿Te gusta leer libros?", options: ["Sí", "No"] },
+    { id: 3, text: "¿Te gusta conversar con tus compañeros durante las clases?", options: ["Sí", "No"] },
+    { id: 4, text: "¿Saltas, caminas o corres dentro del salón de clases?", options: ["Sí", "No"] },
+    { id: 5, text: "¿Mantienes tus cosas organizadas y guardadas adecuadamente?", options: ["Sí", "No"] },
+    { id: 6, text: "¿Te gusta jugar durante las clases?.", options: ["Sí", "No"] },
+    { id: 7, text: "¿Ayudas a recoger y organizar el salón de clase?", options: ["Sí", "No"] },
+    { id: 8, text: "¿Recuerdas fechas, nombres o tareas fácilmente?", options: ["Sí", "No"] }
 ];
 
 const GameTest = ({ userId, id_room, onGameEnd: onTestComplete, studentName, id_test_actual }) => {

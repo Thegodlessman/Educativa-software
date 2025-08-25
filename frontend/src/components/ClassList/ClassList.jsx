@@ -34,7 +34,7 @@ function ClassList() {
 
   const [showDeleteClassModal, setShowDeleteClassModal] = useState(false);
   const [showDeleteStudentModal, setShowDeleteStudentModal] = useState(false);
-  const [entityToDelete, setEntityToDelete] = useState(null); 
+  const [entityToDelete, setEntityToDelete] = useState(null);
   const [confirmationText, setConfirmationText] = useState("");
 
   const fetchStudentsForRoom = useCallback(async (roomId) => {
@@ -72,7 +72,7 @@ function ClassList() {
     setLoadingTestStatusStudentView(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/test/status/${roomId}/${userId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}test/status/${roomId}/${userId}`, { headers: { 'Authorization': `Bearer ${token}` } });
       setStudentTestStatus(response.data);
     } catch (error) {
       console.error("Error al cargar el estado de la prueba del estudiante:", error);
@@ -108,7 +108,7 @@ function ClassList() {
       id_user: student.id_user,
       user_name: nameParts[0] || '',
       user_lastname: nameParts.slice(1).join(' ') || '',
-      user_ced: student.user_ced || '', 
+      user_ced: student.user_ced || '',
       user_email: student.user_email || ''
     });
     setShowEditModal(true);
@@ -188,7 +188,7 @@ function ClassList() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/test/start-student-test`,
+        `${import.meta.env.VITE_BACKEND_URL}test/start-student-test`,
         { id_user: userData.id_user, id_room: selectedRoom.id_room },
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
@@ -351,7 +351,7 @@ function ClassList() {
           ) : (
             <div className="text-center text-danger"><h4>Rol desconocido.</h4></div>
           )}
-        </div>  
+        </div>
 
         <Modal show={showDeleteStudentModal} onHide={() => setShowDeleteStudentModal(false)} centered dialogClassName="cl-delete-modal">
           <Modal.Header closeButton>
@@ -374,7 +374,7 @@ function ClassList() {
           <Modal.Body>
             <p>Esta acción es irreversible y borrará la clase junto con todos los datos de sus estudiantes.</p>
             <p>Para confirmar, por favor escribe <strong>ELIMINAR</strong> en el campo de abajo.</p>
-            <Form.Control 
+            <Form.Control
               type="text"
               value={confirmationText}
               onChange={(e) => setConfirmationText(e.target.value)}
@@ -384,8 +384,8 @@ function ClassList() {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowDeleteClassModal(false)}>Cancelar</Button>
-            <Button 
-              variant="danger" 
+            <Button
+              variant="danger"
               onClick={executeDeleteClass}
               disabled={confirmationText !== 'ELIMINAR'}
             >

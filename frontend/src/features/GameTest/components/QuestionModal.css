@@ -46,7 +46,10 @@
 }
 
 .modal-footer {
+    flex-direction: row;
     padding: 20px;
+    display: flex;
+    justify-content: center;
     align-items: center;
     text-align: center;
 }
@@ -55,12 +58,14 @@
 .modal-options {
     display: flex;
     justify-content: center;
-    gap: 30px; /* Espacio entre los botones */
+    gap: 30px;
+    /* Espacio entre los botones */
 }
 
 .modal-option-button {
     background-color: transparent;
-    border: 2px solid; /* El color se definirá en las clases específicas */
+    border: 2px solid;
+    /* El color se definirá en las clases específicas */
     color: white;
     padding: 12px 40px;
     font-size: 16px;
@@ -72,26 +77,36 @@
 }
 
 .yes-button {
-    border-color: #007bff; ; /* Verde para "Sí" */
-    color: #007bff; ;
+    border-color: #007bff;
+    ;
+    /* Verde para "Sí" */
+    color: #007bff;
+    ;
 }
 
 .yes-button:hover {
-    background-color: #007bff; ;
+    background-color: #007bff;
+    ;
     color: #fff;
-    box-shadow: 0 0 15px #007bff; ;
+    box-shadow: 0 0 15px #007bff;
+    ;
 }
 
 .no-button {
-    border-color: #007bff; ; /* Rojo para "No" */
-    color: #007bff; ;
+    border-color: #007bff;
+    ;
+    /* Rojo para "No" */
+    color: #007bff;
+    ;
 }
 
 .no-button:hover {
     background-color: #007bff;
     color: #fff;
-    box-shadow: 0 0 15px #007bff; ;
+    box-shadow: 0 0 15px #007bff;
+    ;
 }
+
 /* --- FIN DE ESTILOS NUEVOS --- */
 
 
@@ -100,6 +115,7 @@
         opacity: 0;
         transform: scale(0.9);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
