@@ -28,7 +28,7 @@ app.use(cors({
     exposedHeaders: ['Content-Disposition']
 }));
 
-app.use('/api/teacher', teacherRouter); 
+app.use('/api/teacher', teacherRouter);
 app.use(userRoutes)
 app.use(profileRoutes)
 app.use(roomRoutes)
@@ -86,7 +86,7 @@ io.on('connection', (socket) => {
                 console.log(`Backend: El estudiante ya había iniciado la prueba. Reutilizando ID de prueba: ${id_test}.`);
                 return socket.emit('testStart', { id_test });
             }
-            
+
             // 3. Si no existe, creamos la nueva prueba
             const insertQuery = `
                 INSERT INTO tests (id_user_room, test_date, test_version) 
@@ -139,7 +139,7 @@ io.on('connection', (socket) => {
                     missed_shots, total_time, reaction_time_variability
                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
             `;
-            
+
             const gameDurationSeconds = (receivedMetrics.totalGameDuration || 0) > 0 ? (receivedMetrics.totalGameDuration / 1000) : 0;
 
             await client.query(metricsInsertQuery, [
@@ -149,14 +149,14 @@ io.on('connection', (socket) => {
                 receivedMetrics.collision_errors || 0,
                 receivedMetrics.omission_errors || 0,
                 receivedMetrics.commission_errors || 0,
-                receivedMetrics.missed_shots ,
+                receivedMetrics.missed_shots,
                 gameDurationSeconds ? parseFloat(gameDurationSeconds.toFixed(2)) : null,
                 parseFloat(riskProfile.analytics.reactionTimeVariability) || null
             ]);
 
             const { questionsAnswered } = receivedMetrics;
             if (questionsAnswered && Array.isArray(questionsAnswered) && questionsAnswered.length > 0) {
-                const answerInsertQuery = `INSERT INTO test_Youtubes (id_test, question_text, user_answer, answer_timestamp) VALUES ($1, $2, $3, TO_TIMESTAMP($4 / 1000.0));`;
+                const answerInsertQuery = `INSERT INTO test_youtubes (id_test, question_text, user_answer, answer_timestamp) VALUES ($1, $2, $3, TO_TIMESTAMP($4 / 1000.0));`;
                 for (const ans of questionsAnswered) {
                     await client.query(answerInsertQuery, [id_test_para_actualizar, ans.questionText, ans.answer, ans.timestamp]);
                 }

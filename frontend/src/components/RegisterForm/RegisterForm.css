@@ -1,9 +1,9 @@
 .register-form-container {
     width: 100%;
-    max-width: 450px; 
+    max-width: 450px;
 }
 
-.register-student-container{
+.register-student-container {
     display: flex;
     flex-direction: column;
 }
