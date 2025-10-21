@@ -8,9 +8,11 @@ import './AdminSidebar.css';
 const AdminSidebar = ({ activeView, setActiveView }) => {
     const navItems = [
         // Nuevo item de navegación para la bienvenida
-        { key: 'welcome', icon: <BsHouseDoorFill />, label: 'Inicio' }, 
+        { key: 'welcome', icon: <BsHouseDoorFill />, label: 'Inicio' },
         { key: 'users', icon: <BsPeopleFill />, label: 'Usuarios' },
         { key: 'institutions', icon: <BsBuilding />, label: 'Instituciones' },
+        { key: 'locations', icon: <BsDiagram3Fill />, label: 'Ubicaciones' },
+        { key: 'statistics', icon: <BsDiagram3Fill />, label: 'Estadísticas' },
         { key: 'materials', icon: <BsBookHalf />, label: 'Material de Apoyo' },
         { key: 'roles', icon: <BsDiagram3Fill />, label: 'Roles' },
     ];

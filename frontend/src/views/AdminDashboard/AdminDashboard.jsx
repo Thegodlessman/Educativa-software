@@ -5,16 +5,22 @@ import InstitutionManagement from './InstitutionManagement';
 import MaterialManagement from './MaterialManagement';
 import RoleManagement from './RoleManagement';
 import AdminWelcome from './AdminWelcome';
+import LocationManagement from './LocationManagement';
+import Statistics from './Statistics';
 
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-    const [activeView, setActiveView] = useState('welcome'); 
+    const [activeView, setActiveView] = useState('welcome');
 
     const renderContent = () => {
         switch (activeView) {
             case 'users':
                 return <UserManagement />;
+            case 'locations':
+                return <LocationManagement />;
+            case 'statistics':
+                return <Statistics />;
             case 'institutions':
                 return <InstitutionManagement />;
             case 'materials':

@@ -1,11 +1,78 @@
 .admin-dashboard-layout {
     display: flex;
     min-height: 100vh;
-    background-color: #f4f7f6;
+    background-color: #f8fafc;
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
 }
 
 .admin-main-content {
     flex-grow: 1;
-    padding: 2rem;
-    margin-top: 60px; 
+    padding: 2.25rem;
+    margin-top: 60px;
+}
+
+.admin-main-content h2 {
+    color: #0f172a;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.admin-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    margin-bottom: 1rem;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Modal styles */
+.admin-modal .modal-dialog {
+    max-width: 900px;
+}
+
+.admin-modal-content {
+    border-radius: 14px;
+    overflow: hidden;
+    animation: modalEnter 220ms ease-out;
+}
+
+@keyframes modalEnter {
+    from {
+        transform: translateY(-12px) scale(0.995);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.admin-modal .modal-header {
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.06), rgba(99, 102, 241, 0.03));
+    border-bottom: none;
+}
+
+.admin-modal .modal-title {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.admin-modal .btn-primary {
+    background-color: #6366f1;
+    border-color: #6366f1;
+}
+
+.admin-modal .btn-outline-secondary {
+    border-color: #cbd5e1;
+    color: #334155;
+}
+
+.admin-modal .modal-body {
+    padding: 1.25rem 1.5rem;
 }

@@ -1,4 +1,16 @@
-import { pool } from "../db.js"; 
+import { pool } from "../db.js";
+import cloudinary from '../cloudinary.js';
+
+const uploadToCloudinary = async (fileBuffer, mimeType, filename) => {
+    try {
+        const base64 = `data:${mimeType};base64,${fileBuffer.toString('base64')}`;
+        const res = await cloudinary.uploader.upload(base64, { folder: 'educativa/materials', public_id: filename });
+        return res.secure_url;
+    } catch (err) {
+        console.error('Cloudinary upload error', err);
+        throw err;
+    }
+};
 
 // --- Controladores para Material Types ---
 
@@ -76,13 +88,25 @@ export const deleteMaterialType = async (req, res) => {
 // --- Controladores para Support Materials ---
 export const createSupportMaterial = async (req, res) => {
     const { id_material_type, material_title, material_description, material_url, target_audience, source_organization, keywords } = req.body;
-    if (!id_material_type || !material_title || !material_url) {
-        return res.status(400).json({ message: "id_material_type, material_title, y material_url son requeridos." });
+
+    if (!id_material_type || !material_title) {
+        return res.status(400).json({ message: "id_material_type y material_title son requeridos." });
     }
+
     try {
+        let finalUrl = material_url || null;
+        // Si se envió archivo via multipart (req.file)
+        if (req.file) {
+            finalUrl = await uploadToCloudinary(req.file.buffer, req.file.mimetype, `material_${Date.now()}`);
+        }
+
+        if (!finalUrl) {
+            return res.status(400).json({ message: "Se requiere material_url o un archivo adjunto." });
+        }
+
         const result = await pool.query(
             "INSERT INTO support_materials (id_material_type, material_title, material_description, material_url, target_audience, source_organization, keywords) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-            [id_material_type, material_title, material_description, material_url, target_audience, source_organization, keywords]
+            [id_material_type, material_title, material_description, finalUrl, target_audience, source_organization, keywords]
         );
         res.status(201).json(result.rows[0]);
     } catch (error) {
@@ -96,13 +120,30 @@ export const createSupportMaterial = async (req, res) => {
 
 export const getAllSupportMaterials = async (req, res) => {
     try {
-        const result = await pool.query(`
-            SELECT sm.*, mt.type_name 
-            FROM support_materials sm
-            JOIN material_types mt ON sm.id_material_type = mt.id_material_type
-            ORDER BY sm.material_title ASC
-        `);
-        res.status(200).json(result.rows);
+        const page = parseInt(req.query.page || '1', 10);
+        const limit = parseInt(req.query.limit || '10', 10);
+        const search = (req.query.search || '').trim();
+        const offset = (page - 1) * limit;
+
+        let baseQuery = `FROM support_materials sm JOIN material_types mt ON sm.id_material_type = mt.id_material_type`;
+        const params = [];
+        if (search) {
+            params.push(`%${search}%`);
+            baseQuery += ` WHERE sm.material_title ILIKE $${params.length} OR sm.material_description ILIKE $${params.length}`;
+        }
+
+        // total
+        const countRes = await pool.query(`SELECT COUNT(*) ${baseQuery}`, params);
+        const total = parseInt(countRes.rows[0].count, 10);
+
+        const dataParams = params.slice();
+        dataParams.push(limit);
+        dataParams.push(offset);
+
+        const dataQuery = `SELECT sm.*, mt.type_name ${baseQuery} ORDER BY sm.material_title ASC LIMIT $${dataParams.length - 1} OFFSET $${dataParams.length}`;
+        const result = await pool.query(dataQuery, dataParams);
+
+        res.status(200).json({ items: result.rows, total, page, totalPages: Math.max(1, Math.ceil(total / limit)) });
     } catch (error) {
         console.error("Error obteniendo materiales de apoyo:", error);
         res.status(500).json({ message: "Error interno al obtener los materiales de apoyo." });
@@ -132,9 +173,20 @@ export const updateSupportMaterial = async (req, res) => {
     const { id_material } = req.params;
     const { id_material_type, material_title, material_description, material_url, target_audience, source_organization, keywords } = req.body;
     try {
+        let finalUrl = material_url || null;
+        if (req.file) {
+            finalUrl = await uploadToCloudinary(req.file.buffer, req.file.mimetype, `material_${Date.now()}`);
+        }
+        if (!finalUrl) {
+            // Allow update if material already had a URL; we'll fetch existing to preserve
+            const existing = await pool.query('SELECT material_url FROM support_materials WHERE id_material = $1', [id_material]);
+            if (existing.rows.length === 0) return res.status(404).json({ message: 'Material de apoyo no encontrado.' });
+            finalUrl = existing.rows[0].material_url;
+        }
+
         const result = await pool.query(
             "UPDATE support_materials SET id_material_type = $1, material_title = $2, material_description = $3, material_url = $4, target_audience = $5, source_organization = $6, keywords = $7, updated_at = NOW() WHERE id_material = $8 RETURNING *",
-            [id_material_type, material_title, material_description, material_url, target_audience, source_organization, keywords, id_material]
+            [id_material_type, material_title, material_description, finalUrl, target_audience, source_organization, keywords, id_material]
         );
         if (result.rowCount === 0) {
             return res.status(404).json({ message: "Material de apoyo no encontrado." });

@@ -1,38 +1,45 @@
 .admin-sidebar {
-    background-color: #343a40;
-    color: #f8f9fa;
-    padding: 1.5rem 1rem;
-    min-height: calc(100vh - 60px); /* Resta la altura del navbar */
-    width: 280px;
+    background: linear-gradient(180deg, #ffffff 0%, #f7fafc 100%);
+    color: #1f2937;
+    padding: 2rem 1.25rem;
+    min-height: calc(100vh - 60px);
+    width: 260px;
+    box-shadow: 2px 0 12px rgba(31, 41, 55, 0.06);
 }
 
 .admin-sidebar-title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
     text-align: center;
-    color: #ffffff;
+    color: #0f172a;
 }
 
 .admin-nav-link {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0.8rem 1rem;
-    border-radius: 8px;
-    color: #ced4da;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 12px;
+    color: #475569;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    transition: background-color 0.12s ease, color 0.12s ease, transform 0.12s ease;
 }
 
 .admin-nav-link:hover {
-    background-color: #495057;
-    color: #ffffff;
+    background-color: #eef2ff;
+    color: #3730a3;
+    transform: translateX(4px);
 }
 
 .admin-nav-link.active {
-    background-color: var(--primary-color);
-    color: #ffffff;
-    font-weight: 600;
+    background-color: #eef2ff;
+    color: #3730a3;
+    font-weight: 700;
+    box-shadow: inset 3px 0 0 #6366f1;
+}
+
+.admin-sidebar .bi {
+    font-size: 1.05rem;
 }
